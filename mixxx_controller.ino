@@ -1,24 +1,31 @@
 #include "MIDIUSB.h"
+#include <light_CD74HC4067.h>
+
+CD74HC4067 mux(4, 5, 6, 7); 
+const int signal_pin = A0; 
 
 struct Control {
-  const int pin;
+  const int chan;
   unsigned int value;
   unsigned int prev_value;
   const byte effect;
-  const bool no_side;
 };
 
-Control crossfader = {A0,0,0,1,true};
-Control bpm = {A1,0,0,2,false};
-Control h_tones = {A2,0,0,3,false};
-Control m_tones = {A3,0,0,4,false};
-Control l_tones = {A4,0,0,5,false};
-Control controls[] = {crossfader,bpm,h_tones,m_tones,l_tones};
+Control crossfader = {7,0,0,1};
+
+Control h_tones_l = {0,0,0,3};
+Control m_tones_l = {1,0,0,4};
+Control l_tones_l = {2,0,0,5};
+
+Control h_tones_r = {3,0,0,3};
+Control m_tones_r = {4,0,0,4};
+Control l_tones_r = {5,0,0,5};
+
+
+Control controls[] = {crossfader,h_tones_l,m_tones_l,l_tones_l,h_tones_r,m_tones_r,l_tones_r};
 const int active_controls = sizeof(controls)/sizeof(controls[0]);
 
 byte midi_value;
-
-const int side = 7;
 
 // First parameter is the event type (0x09 = note on, 0x08 = note off).
 // Second parameter is note-on/note-off, combined with the channel.
@@ -50,32 +57,22 @@ void setup() {
   while(!Serial);
   Serial.begin(115200);
   Serial.println("RDY");
-  pinMode(crossfader.pin,INPUT);
-  pinMode(bpm.pin,INPUT);
-  pinMode(h_tones.pin,INPUT);
-  pinMode(m_tones.pin,INPUT);
-  pinMode(l_tones.pin,INPUT);
-  pinMode(side,INPUT);
+  pinMode(signal_pin, INPUT);
 }
 
 void loop() {
   for (int i = 0; i < active_controls; i++) {
-    controls[i].value = analogRead(controls[i].pin);
+    mux.channel(controls[i].chan);
+    
+    controls[i].value = analogRead(signal_pin);
     if ( abs(controls[i].value - controls[i].prev_value) > 3 ){
       controls[i].prev_value = controls[i].value;
       midi_value = map(controls[i].value,0,1023,0,127);
-      if ( digitalRead(side) == HIGH || controls[i].no_side) {
-        controlChange(1,controls[i].effect,controls[i].value);
-      } else {
-        controlChange(2,controls[i].effect,controls[i].value);
-      }
+      controlChange(1,controls[i].effect,controls[i].value);
+      
       Serial.print("Sent ");
       Serial.print(controls[i].effect);
-      if ( digitalRead(side) == HIGH || controls[i].no_side) {
-        Serial.print(",R,");
-      } else {
-        Serial.print(",L,");
-      }
+      
       Serial.print(controls[i].value);
       Serial.print(",");
       Serial.print(controls[i].prev_value);
