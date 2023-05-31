@@ -6,20 +6,20 @@ const int signal_pin = A0;
 
 struct Control {
   const int chan;
-  unsigned int value;
-  unsigned int prev_value;
+  int value;
+  int prev_value;
   const byte effect;
 };
 
-Control crossfader = {7,0,0,1};
+Control crossfader = {6,0,0,0};
 
-Control h_tones_l = {0,0,0,3};
-Control m_tones_l = {1,0,0,4};
-Control l_tones_l = {2,0,0,5};
+Control h_tones_l = {0,0,0,1};
+Control m_tones_l = {1,0,0,2};
+Control l_tones_l = {2,0,0,3};
 
-Control h_tones_r = {3,0,0,3};
-Control m_tones_r = {4,0,0,4};
-Control l_tones_r = {5,0,0,5};
+Control h_tones_r = {3,0,0,4};
+Control m_tones_r = {4,0,0,5};
+Control l_tones_r = {5,0,0,6};
 
 
 Control controls[] = {crossfader,h_tones_l,m_tones_l,l_tones_l,h_tones_r,m_tones_r,l_tones_r};
@@ -65,19 +65,21 @@ void loop() {
     mux.channel(controls[i].chan);
     
     controls[i].value = analogRead(signal_pin);
-    if ( abs(controls[i].value - controls[i].prev_value) > 3 ){
-      controls[i].prev_value = controls[i].value;
+    if ( abs(controls[i].value - controls[i].prev_value) > 9 ){
+
       midi_value = map(controls[i].value,0,1023,0,127);
-      controlChange(1,controls[i].effect,controls[i].value);
+      controlChange(1,controls[i].effect,midi_value);
       
-      Serial.print("Sent ");
-      Serial.print(controls[i].effect);
+//      Serial.print("Sent ");
+//      Serial.print(controls[i].effect);
+//      Serial.print(",");      
+//      Serial.print(controls[i].value);
+//      Serial.print(",");
+//      Serial.print(controls[i].prev_value);
+//      Serial.print(",");
+//      Serial.println( abs(controls[i].value - controls[i].prev_value) );
+      controls[i].prev_value = controls[i].value;
       
-      Serial.print(controls[i].value);
-      Serial.print(",");
-      Serial.print(controls[i].prev_value);
-      Serial.print(",");
-      Serial.println( abs(controls[i].value - controls[i].prev_value) );
       delay(10);
       MidiUSB.flush();
     }
