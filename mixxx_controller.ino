@@ -1,31 +1,59 @@
 #include "Arduino.h"
 #include "MIDIUSB.h"
-//#define DEBUG
+#include <EncoderButton.h>
+#define DEBUG
 
-struct Control {
+struct analogControl {
   const int pin;
   int value;
   int prev_value;
   const byte effect;
 };
 
-Control slider_0 = {A0,0,0,7};
-Control slider_1 = {A1,0,0,8};
-Control slider_2 = {A2,0,0,9};
+analogControl slider_0 = {A0,0,0,7};
+analogControl slider_1 = {A1,0,0,8};
+analogControl slider_2 = {A2,0,0,9};
 
-Control knob_0 = {A3,0,0,1};
-Control knob_1 = {A4,0,0,2};
-Control knob_2 = {A5,0,0,3};
+analogControl knob_0 = {A3,0,0,1};
+analogControl knob_1 = {A4,0,0,2};
+analogControl knob_2 = {A5,0,0,3};
 
-Control knob_3 = {A7,0,0,4};
-Control knob_4 = {A10,0,0,5};
-Control knob_5 = {A11,0,0,6};
+analogControl knob_3 = {A7,0,0,4};
+analogControl knob_4 = {A10,0,0,5};
+analogControl knob_5 = {A11,0,0,6};
 
 
-Control controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};
-const int active_controls = sizeof(controls)/sizeof(controls[0]);
+analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};
+const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
+
+const int clk_0 = 2;
+const int clk_1 = 3;
+
+const int dt_0 = 4;
+const int dt_1 = 5;
+const int sw_0 = 9;
+const int sw_1 = 11;
+
+volatile int val_0 = 0;
+volatile int val_1 = 0;
+volatile int val_0_changed = false;
+volatile int val_1_changed = false;
+bool sw_0_pressed = false;
+bool sw_1_pressed = false;
+//bool sw_2_pressed = false;
+//bool sw_3_pressed = false;
+
+int sw_0_debounce = 0;
+int sw_1_debounce = 0;
+//int sw_2_debounce = 0
+//int sw_3_debounce = 0
 
 byte midi_value;
+
+EncoderButton eb_0(clk_0,dt_0);
+EncoderButton eb_1(clk_1,dt_1);
+
+
 
 // First parameter is the event type (0x09 = note on, 0x08 = note off).
 // Second parameter is note-on/note-off, combined with the channel.
@@ -53,36 +81,106 @@ void controlChange(byte channel, byte control, byte value) {
   MidiUSB.sendMIDI(event);
 }
 
+void eb_Encoder(EncoderButton& eb) {
+  if(&eb == &eb_0) {
+    val_0 = eb.increment();
+    val_0_changed = true;
+  } else {
+    val_1 = eb.increment();
+    val_1_changed = true;
+  }
+}
+
+
 void setup() {
   #ifdef DEBUG
     while(!Serial);
     Serial.begin(115200);
     Serial.println("RDY");
   #endif
+  pinMode(sw_0,INPUT_PULLUP);
+  pinMode(sw_1,INPUT_PULLUP);
+  
+  eb_0.setEncoderHandler(eb_Encoder);
+  eb_1.setEncoderHandler(eb_Encoder);
+  
 }
 
 void loop() {
-  for (int i = 0; i < active_controls; i++) {
-    controls[i].value = analogRead(controls[i].pin);
+  for (int i = 0; i < active_analog_controls; i++) {
+    analog_controls[i].value = analogRead(analog_controls[i].pin);
     
-    if ( abs(controls[i].value - controls[i].prev_value) > 9 ){
+    if ( abs(analog_controls[i].value - analog_controls[i].prev_value) > 9 ){
 
-      midi_value = map(controls[i].value,0,1023,0,127);
-      controlChange(1,controls[i].effect,midi_value);
+      midi_value = map(analog_controls[i].value,0,1023,0,127);
+      controlChange(1,analog_controls[i].effect,midi_value);
       #ifdef DEBUG
         Serial.print("Sent ");
-        Serial.print(controls[i].effect);
+        Serial.print(analog_controls[i].effect);
         Serial.print(",");      
-        Serial.print(controls[i].value);
+        Serial.print(analog_controls[i].value);
         Serial.print(",");
-        Serial.print(controls[i].prev_value);
+        Serial.print(analog_controls[i].prev_value);
         Serial.print(",");
-        Serial.println( abs(controls[i].value - controls[i].prev_value) );
+        Serial.println( abs(analog_controls[i].value - analog_controls[i].prev_value) );
       #endif
-      controls[i].prev_value = controls[i].value;
+      analog_controls[i].prev_value = analog_controls[i].value;
       
-      delay(10);
       MidiUSB.flush();
     }
   }
+  
+  eb_0.update();
+  eb_1.update();
+  
+  if (val_0_changed) {
+    if (val_0 < 0) {
+      controlChange(1,10,1);
+    } else {
+      controlChange(1,11,1);
+    }
+      #ifdef DEBUG
+      Serial.print("val_0=");Serial.println(val_0);
+      #endif
+    val_0_changed = false;
+    MidiUSB.flush();
+  }
+  if (val_1_changed) {
+    if (val_1 < 0) {
+      controlChange(1,12,1);
+    } else {
+      controlChange(1,13,1);
+    }
+      #ifdef DEBUG
+      Serial.print("val_1=");Serial.println(val_1);
+      #endif
+    val_1_changed = false;
+    MidiUSB.flush();
+  }  
+  if (digitalRead(sw_0) == LOW) {
+    sw_0_pressed = true;
+    sw_0_debounce = millis();
+  }
+  if (digitalRead(sw_1) == LOW) {
+    sw_1_pressed = true;
+    sw_1_debounce = millis();
+  }
+  if (sw_0_pressed && (millis() - sw_0_debounce > 10) && digitalRead(sw_0) == HIGH) {
+    controlChange(1,14,1);
+    sw_0_pressed = false;
+      #ifdef DEBUG
+      Serial.println("sw0 pressed");
+      #endif
+
+    MidiUSB.flush();
+  }
+  if (sw_1_pressed && (millis() - sw_1_debounce > 10) && digitalRead(sw_1) == HIGH) {
+    controlChange(1,15,1);
+    sw_1_pressed = false;
+      #ifdef DEBUG
+      Serial.println("sw1 pressed");
+      #endif
+    MidiUSB.flush();    
+  }
+
 }
