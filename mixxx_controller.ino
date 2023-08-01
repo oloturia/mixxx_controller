@@ -3,6 +3,7 @@
 #include <EncoderButton.h>
 #define DEBUG
 
+//analog controls (sliders and potentiometers)
 struct analogControl {
   const int pin;
   int value;
@@ -26,34 +27,40 @@ analogControl knob_5 = {A11,0,0,6};
 analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};
 const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
 
+//digital encoders
 const int clk_0 = 2;
 const int clk_1 = 3;
 
 const int dt_0 = 4;
 const int dt_1 = 5;
-const int sw_0 = 9;
-const int sw_1 = 11;
 
 volatile int val_0 = 0;
 volatile int val_1 = 0;
 volatile int val_0_changed = false;
 volatile int val_1_changed = false;
-bool sw_0_pressed = false;
-bool sw_1_pressed = false;
-//bool sw_2_pressed = false;
-//bool sw_3_pressed = false;
-
-int sw_0_debounce = 0;
-int sw_1_debounce = 0;
-//int sw_2_debounce = 0
-//int sw_3_debounce = 0
-
-byte midi_value;
 
 EncoderButton eb_0(clk_0,dt_0);
 EncoderButton eb_1(clk_1,dt_1);
 
+//digital switches
+struct digitalButton  {
+  const int pin;
+  bool pressed;
+  int debounce;
+  int pres_state;
+  const byte effect;
+};
 
+digitalButton sw0 = {9,false,0,LOW,14};
+digitalButton sw1 = {11,false,0,LOW,15};
+digitalButton sw2 = {8,false,0,LOW,16};
+digitalButton sw3 = {7,false,0,LOW,17};
+
+digitalButton switches[] = {sw0,sw1,sw2,sw3};
+const int active_switches = sizeof(switches)/sizeof(switches[0]);
+
+//midi
+byte midi_value;
 
 // First parameter is the event type (0x09 = note on, 0x08 = note off).
 // Second parameter is note-on/note-off, combined with the channel.
@@ -98,14 +105,17 @@ void setup() {
     Serial.begin(115200);
     Serial.println("RDY");
   #endif
-  pinMode(sw_0,INPUT_PULLUP);
-  pinMode(sw_1,INPUT_PULLUP);
+
+  for (int i = 0; i < active_switches; i++) {
+    pinMode(switches[i].pin,INPUT_PULLUP);
+  }
   
   eb_0.setEncoderHandler(eb_Encoder);
   eb_1.setEncoderHandler(eb_Encoder);
   
 }
 
+.
 void loop() {
   for (int i = 0; i < active_analog_controls; i++) {
     analog_controls[i].value = analogRead(analog_controls[i].pin);
@@ -157,6 +167,23 @@ void loop() {
     val_1_changed = false;
     MidiUSB.flush();
   }  
+  for (int i = 0; i < active_switches; i++) {
+    if (digitalRead(switches[i].pin) == switches[i].pres_state) {
+      switches[i].pressed = true;
+      switches[i].debounce = millis();
+    }
+    if (switches[i].pressed && (millis() - switches[i].debounce > 10) && digitalRead(switches[i].pin) != switches[i].pres_state) {
+      controlChange(1,switches[i].effect,1);
+      switches[i].pressed = false;
+      #ifdef DEBUG
+      Serial.print("Pressed SW");
+      Serial.println(switches[i].pin);
+      #endif
+      MidiUSB.flush();
+    }
+  }
+
+  /*
   if (digitalRead(sw_0) == LOW) {
     sw_0_pressed = true;
     sw_0_debounce = millis();
@@ -182,5 +209,5 @@ void loop() {
       #endif
     MidiUSB.flush();    
   }
-
+*/
 }
