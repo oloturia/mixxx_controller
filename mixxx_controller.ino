@@ -30,17 +30,22 @@ const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_control
 //digital encoders
 const int clk_0 = 2;
 const int clk_1 = 3;
+const int clk_2 = 0;
 
 const int dt_0 = 4;
 const int dt_1 = 5;
+const int dt_2 = 1;
 
 volatile int val_0 = 0;
 volatile int val_1 = 0;
+volatile int val_2 = 0;
 volatile int val_0_changed = false;
 volatile int val_1_changed = false;
+volatile int val_2_changed = false;
 
 EncoderButton eb_0(clk_0,dt_0);
 EncoderButton eb_1(clk_1,dt_1);
+EncoderButton eb_2(clk_2,dt_2);
 
 //digital switches
 struct digitalButton  {
@@ -55,8 +60,9 @@ digitalButton sw0 = {9,false,0,LOW,14};
 digitalButton sw1 = {11,false,0,LOW,15};
 digitalButton sw2 = {8,false,0,LOW,16};
 digitalButton sw3 = {7,false,0,LOW,17};
+digitalButton sw4 = {13,false,0,LOW,20};
 
-digitalButton switches[] = {sw0,sw1,sw2,sw3};
+digitalButton switches[] = {sw0,sw1,sw2,sw3,sw4};
 const int active_switches = sizeof(switches)/sizeof(switches[0]);
 
 //midi
@@ -92,9 +98,12 @@ void eb_Encoder(EncoderButton& eb) {
   if(&eb == &eb_0) {
     val_0 = eb.increment();
     val_0_changed = true;
-  } else {
+  } else if (&eb == &eb_1) {
     val_1 = eb.increment();
     val_1_changed = true;
+  } else {
+    val_2 = eb.increment();
+    val_2_changed = true;
   }
 }
 
@@ -112,10 +121,10 @@ void setup() {
   
   eb_0.setEncoderHandler(eb_Encoder);
   eb_1.setEncoderHandler(eb_Encoder);
-  
+  eb_2.setEncoderHandler(eb_Encoder);
 }
 
-.
+
 void loop() {
   for (int i = 0; i < active_analog_controls; i++) {
     analog_controls[i].value = analogRead(analog_controls[i].pin);
@@ -142,6 +151,7 @@ void loop() {
   
   eb_0.update();
   eb_1.update();
+  eb_2.update();
   
   if (val_0_changed) {
     if (val_0 < 0) {
@@ -167,6 +177,19 @@ void loop() {
     val_1_changed = false;
     MidiUSB.flush();
   }  
+  if (val_2_changed) {
+    if (val_2 < 0) {
+      controlChange(1,18,1);
+    } else {
+      controlChange(1,19,1);
+    }
+      #ifdef DEBUG
+      Serial.print("val_2=");Serial.println(val_2);
+      #endif
+    val_2_changed = false;
+    MidiUSB.flush();
+  }  
+  
   for (int i = 0; i < active_switches; i++) {
     if (digitalRead(switches[i].pin) == switches[i].pres_state) {
       switches[i].pressed = true;
@@ -182,32 +205,4 @@ void loop() {
       MidiUSB.flush();
     }
   }
-
-  /*
-  if (digitalRead(sw_0) == LOW) {
-    sw_0_pressed = true;
-    sw_0_debounce = millis();
-  }
-  if (digitalRead(sw_1) == LOW) {
-    sw_1_pressed = true;
-    sw_1_debounce = millis();
-  }
-  if (sw_0_pressed && (millis() - sw_0_debounce > 10) && digitalRead(sw_0) == HIGH) {
-    controlChange(1,14,1);
-    sw_0_pressed = false;
-      #ifdef DEBUG
-      Serial.println("sw0 pressed");
-      #endif
-
-    MidiUSB.flush();
-  }
-  if (sw_1_pressed && (millis() - sw_1_debounce > 10) && digitalRead(sw_1) == HIGH) {
-    controlChange(1,15,1);
-    sw_1_pressed = false;
-      #ifdef DEBUG
-      Serial.println("sw1 pressed");
-      #endif
-    MidiUSB.flush();    
-  }
-*/
 }
