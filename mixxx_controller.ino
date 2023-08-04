@@ -46,23 +46,23 @@ rotaryEncoder rotary_encoders[] = {rE_0,rE_1,rE_2};
 const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 
 //digital switches
-const int double_interval = 100;
+const int double_interval = 400;
 
 struct digitalButton  {
   const int pin;
   bool pressed;
-  int debounce;
+  long debounce;
   int pres_state;
-  int countdown;
+  long countdown;
   const byte effect;
   const byte effect_double;
 };
 
-digitalButton sw0 = {9,false,0,double_interval,LOW,14,21};
-digitalButton sw1 = {11,false,0,double_interval,LOW,15,22};
-digitalButton sw2 = {8,false,0,double_interval,LOW,16,23};
-digitalButton sw3 = {7,false,0,double_interval,LOW,17,24};
-digitalButton sw4 = {13,false,0,double_interval,LOW,20,25};
+digitalButton sw0 = {9,false,0,0,LOW,14,0};
+digitalButton sw1 = {11,false,0,0,LOW,15,0};
+digitalButton sw2 = {8,false,0,0,LOW,16,23};
+digitalButton sw3 = {7,false,0,0,LOW,17,24};
+digitalButton sw4 = {13,false,0,0,LOW,20,25};
 
 digitalButton switches[] = {sw0,sw1,sw2,sw3,sw4};
 const int active_switches = sizeof(switches)/sizeof(switches[0]);
@@ -135,7 +135,7 @@ void loop() {
         Serial.print("Sent ");
         Serial.print(analog_controls[i].effect);
         Serial.print(",");      
-        Serial.println(analog_controls[i].value);
+        Serial.print(analog_controls[i].value);
         Serial.print(",");
         Serial.println( abs(analog_controls[i].value - analog_controls[i].prev_value) );
       #endif
@@ -172,6 +172,37 @@ void loop() {
       switches[i].debounce = millis();
     }
     if (switches[i].pressed && (millis() - switches[i].debounce > 10) && digitalRead(switches[i].pin) != switches[i].pres_state) {
+      if (switches[i].effect_double == 0) {
+        controlChange(1,switches[i].effect,1);
+        #ifdef DEBUG
+         Serial.print("Click SW");
+         Serial.println(switches[i].pin);
+        #endif
+        MidiUSB.flush();        
+      } else if (switches[i].countdown > 0) {
+        switches[i].countdown = 0;
+        controlChange(1,switches[i].effect_double,1);
+        #ifdef DEBUG
+          Serial.print("Double click SW");
+          Serial.println(switches[i].pin);
+        #endif
+        MidiUSB.flush();
+      } else {
+        switches[i].countdown = millis();
+      }
+      switches[i].pressed = false;
+    }
+    if (switches[i].countdown > 0 and millis() - switches[i].countdown > double_interval) {
+      switches[i].countdown = 0;
+      controlChange(1,switches[i].effect,1);
+      #ifdef DEBUG
+         Serial.print("Single click SW");
+         Serial.println(switches[i].pin);
+      #endif
+      MidiUSB.flush();
+    }
+    /*
+      switches[i].countdown = double_interval
       controlChange(1,switches[i].effect,1);
       switches[i].pressed = false;
       #ifdef DEBUG
@@ -179,6 +210,6 @@ void loop() {
         Serial.println(switches[i].pin);
       #endif
       MidiUSB.flush();
-    }
+    }*/
   }
 }
