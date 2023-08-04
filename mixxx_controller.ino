@@ -28,39 +28,41 @@ analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob
 const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
 
 //digital encoders
-const int clk_0 = 2;
-const int clk_1 = 3;
-const int clk_2 = 0;
+struct rotaryEncoder {
+  const int clk;
+  const int dt;
+  volatile int val;
+  volatile int val_changed;
+  EncoderButton eb;
+  const int effect_fd;
+  const int effect_bk;
+};
 
-const int dt_0 = 4;
-const int dt_1 = 5;
-const int dt_2 = 1;
+rotaryEncoder rE_0 = {2,4,0,false,EncoderButton (2,4),10,11};
+rotaryEncoder rE_1 = {3,5,0,false,EncoderButton (3,5),12,13};
+rotaryEncoder rE_2 = {0,1,0,false,EncoderButton (0,1),18,19};
 
-volatile int val_0 = 0;
-volatile int val_1 = 0;
-volatile int val_2 = 0;
-volatile int val_0_changed = false;
-volatile int val_1_changed = false;
-volatile int val_2_changed = false;
-
-EncoderButton eb_0(clk_0,dt_0);
-EncoderButton eb_1(clk_1,dt_1);
-EncoderButton eb_2(clk_2,dt_2);
+rotaryEncoder rotary_encoders[] = {rE_0,rE_1,rE_2};
+const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 
 //digital switches
+const int double_interval = 100;
+
 struct digitalButton  {
   const int pin;
   bool pressed;
   int debounce;
   int pres_state;
+  int countdown;
   const byte effect;
+  const byte effect_double;
 };
 
-digitalButton sw0 = {9,false,0,LOW,14};
-digitalButton sw1 = {11,false,0,LOW,15};
-digitalButton sw2 = {8,false,0,LOW,16};
-digitalButton sw3 = {7,false,0,LOW,17};
-digitalButton sw4 = {13,false,0,LOW,20};
+digitalButton sw0 = {9,false,0,double_interval,LOW,14,21};
+digitalButton sw1 = {11,false,0,double_interval,LOW,15,22};
+digitalButton sw2 = {8,false,0,double_interval,LOW,16,23};
+digitalButton sw3 = {7,false,0,double_interval,LOW,17,24};
+digitalButton sw4 = {13,false,0,double_interval,LOW,20,25};
 
 digitalButton switches[] = {sw0,sw1,sw2,sw3,sw4};
 const int active_switches = sizeof(switches)/sizeof(switches[0]);
@@ -94,16 +96,12 @@ void controlChange(byte channel, byte control, byte value) {
   MidiUSB.sendMIDI(event);
 }
 
-void eb_Encoder(EncoderButton& eb) {
-  if(&eb == &eb_0) {
-    val_0 = eb.increment();
-    val_0_changed = true;
-  } else if (&eb == &eb_1) {
-    val_1 = eb.increment();
-    val_1_changed = true;
-  } else {
-    val_2 = eb.increment();
-    val_2_changed = true;
+int eb_Encoder(EncoderButton& eb) {
+  for (int i = 0; i < active_encoders; i++) {
+    if (&eb == &rotary_encoders[i].eb){
+      rotary_encoders[i].val = eb.increment();
+      rotary_encoders[i].val_changed = true;
+    }
   }
 }
 
@@ -118,10 +116,10 @@ void setup() {
   for (int i = 0; i < active_switches; i++) {
     pinMode(switches[i].pin,INPUT_PULLUP);
   }
-  
-  eb_0.setEncoderHandler(eb_Encoder);
-  eb_1.setEncoderHandler(eb_Encoder);
-  eb_2.setEncoderHandler(eb_Encoder);
+
+  for (int i = 0; i < active_encoders; i++) {
+    rotary_encoders[i].eb.setEncoderHandler(eb_Encoder);
+  }
 }
 
 
@@ -137,9 +135,7 @@ void loop() {
         Serial.print("Sent ");
         Serial.print(analog_controls[i].effect);
         Serial.print(",");      
-        Serial.print(analog_controls[i].value);
-        Serial.print(",");
-        Serial.print(analog_controls[i].prev_value);
+        Serial.println(analog_controls[i].value);
         Serial.print(",");
         Serial.println( abs(analog_controls[i].value - analog_controls[i].prev_value) );
       #endif
@@ -149,47 +145,27 @@ void loop() {
     }
   }
   
-  eb_0.update();
-  eb_1.update();
-  eb_2.update();
-  
-  if (val_0_changed) {
-    if (val_0 < 0) {
-      controlChange(1,10,1);
-    } else {
-      controlChange(1,11,1);
-    }
+
+  for (int i = 0; i < active_encoders; i++) {
+    rotary_encoders[i].eb.update();
+    
+    if(rotary_encoders[i].val_changed) {
+      if(rotary_encoders[i].val < 0){
+        controlChange(1,rotary_encoders[i].effect_fd,1);
+      } else {
+        controlChange(1,rotary_encoders[i].effect_bk,1);
+      }
+      rotary_encoders[i].val_changed = false;
+      MidiUSB.flush();
       #ifdef DEBUG
-      Serial.print("val_0=");Serial.println(val_0);
+        Serial.print(i);
+        Serial.print(" enc=");
+        Serial.println(rotary_encoders[i].val);
       #endif
-    val_0_changed = false;
-    MidiUSB.flush();
+    }
+
   }
-  if (val_1_changed) {
-    if (val_1 < 0) {
-      controlChange(1,12,1);
-    } else {
-      controlChange(1,13,1);
-    }
-      #ifdef DEBUG
-      Serial.print("val_1=");Serial.println(val_1);
-      #endif
-    val_1_changed = false;
-    MidiUSB.flush();
-  }  
-  if (val_2_changed) {
-    if (val_2 < 0) {
-      controlChange(1,18,1);
-    } else {
-      controlChange(1,19,1);
-    }
-      #ifdef DEBUG
-      Serial.print("val_2=");Serial.println(val_2);
-      #endif
-    val_2_changed = false;
-    MidiUSB.flush();
-  }  
-  
+
   for (int i = 0; i < active_switches; i++) {
     if (digitalRead(switches[i].pin) == switches[i].pres_state) {
       switches[i].pressed = true;
@@ -199,8 +175,8 @@ void loop() {
       controlChange(1,switches[i].effect,1);
       switches[i].pressed = false;
       #ifdef DEBUG
-      Serial.print("Pressed SW");
-      Serial.println(switches[i].pin);
+        Serial.print("Pressed SW");
+        Serial.println(switches[i].pin);
       #endif
       MidiUSB.flush();
     }
