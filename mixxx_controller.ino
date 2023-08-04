@@ -3,7 +3,9 @@
 #include <EncoderButton.h>
 #define DEBUG
 
-//analog controls (sliders and potentiometers)
+//analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect
+const int dead_zone = 9;
+
 struct analogControl {
   const int pin;
   int value;
@@ -27,7 +29,7 @@ analogControl knob_5 = {A11,0,0,6};
 analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};
 const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
 
-//digital encoders
+//digital encoders, the fd is forward, bk backward effects, clk should be triggers pins
 struct rotaryEncoder {
   const int clk;
   const int dt;
@@ -45,7 +47,7 @@ rotaryEncoder rE_2 = {0,1,0,false,EncoderButton (0,1),18,19};
 rotaryEncoder rotary_encoders[] = {rE_0,rE_1,rE_2};
 const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 
-//digital switches
+//digital switches, double_interval is the interval of double clicks, if effect_double is 0 the button is immediate, toggle send two different messages for odd and even strokes
 const int double_interval = 400;
 
 struct digitalButton  {
@@ -55,14 +57,16 @@ struct digitalButton  {
   int pres_state;
   long countdown;
   const byte effect;
+  const byte effect_toggle;
+  bool toggled;
   const byte effect_double;
 };
 
-digitalButton sw0 = {9,false,0,0,LOW,14,0};
-digitalButton sw1 = {11,false,0,0,LOW,15,0};
-digitalButton sw2 = {8,false,0,0,LOW,16,23};
-digitalButton sw3 = {7,false,0,0,LOW,17,24};
-digitalButton sw4 = {13,false,0,0,LOW,20,25};
+digitalButton sw0 = {9,false,0,0,LOW,14,0,false,0};
+digitalButton sw1 = {11,false,0,0,LOW,15,0,false,0};
+digitalButton sw2 = {8,false,0,0,LOW,16,0,false,23};
+digitalButton sw3 = {7,false,0,0,LOW,17,0,false,24};
+digitalButton sw4 = {13,false,0,0,LOW,25,26,false,20};
 
 digitalButton switches[] = {sw0,sw1,sw2,sw3,sw4};
 const int active_switches = sizeof(switches)/sizeof(switches[0]);
@@ -105,7 +109,6 @@ int eb_Encoder(EncoderButton& eb) {
   }
 }
 
-
 void setup() {
   #ifdef DEBUG
     while(!Serial);
@@ -124,11 +127,11 @@ void setup() {
 
 
 void loop() {
-  for (int i = 0; i < active_analog_controls; i++) {
-    analog_controls[i].value = analogRead(analog_controls[i].pin);
-    
-    if ( abs(analog_controls[i].value - analog_controls[i].prev_value) > 9 ){
 
+  //analog controls
+  for (int i = 0; i < active_analog_controls; i++) {
+    analog_controls[i].value = analogRead(analog_controls[i].pin);    
+    if ( abs(analog_controls[i].value - analog_controls[i].prev_value) > dead_zone ){
       midi_value = map(analog_controls[i].value,0,1023,0,127);
       controlChange(1,analog_controls[i].effect,midi_value);
       #ifdef DEBUG
@@ -140,15 +143,13 @@ void loop() {
         Serial.println( abs(analog_controls[i].value - analog_controls[i].prev_value) );
       #endif
       analog_controls[i].prev_value = analog_controls[i].value;
-      
       MidiUSB.flush();
     }
   }
   
-
+  //rotary encoders
   for (int i = 0; i < active_encoders; i++) {
-    rotary_encoders[i].eb.update();
-    
+    rotary_encoders[i].eb.update();  
     if(rotary_encoders[i].val_changed) {
       if(rotary_encoders[i].val < 0){
         controlChange(1,rotary_encoders[i].effect_fd,1);
@@ -163,9 +164,9 @@ void loop() {
         Serial.println(rotary_encoders[i].val);
       #endif
     }
-
   }
 
+  //switches
   for (int i = 0; i < active_switches; i++) {
     if (digitalRead(switches[i].pin) == switches[i].pres_state) {
       switches[i].pressed = true;
@@ -173,7 +174,15 @@ void loop() {
     }
     if (switches[i].pressed && (millis() - switches[i].debounce > 10) && digitalRead(switches[i].pin) != switches[i].pres_state) {
       if (switches[i].effect_double == 0) {
-        controlChange(1,switches[i].effect,1);
+        if (switches[i].effect_toggle == 0) {
+          controlChange(1,switches[i].effect,1);
+        } else if (switches[i].toggled) {
+          controlChange(1,switches[i].effect,1);
+          switches[i].toggled = false;
+        } else {
+          controlChange(1,switches[i].effect_toggle,1);
+          switches[i].toggled = true;
+        }
         #ifdef DEBUG
          Serial.print("Click SW");
          Serial.println(switches[i].pin);
@@ -194,22 +203,22 @@ void loop() {
     }
     if (switches[i].countdown > 0 and millis() - switches[i].countdown > double_interval) {
       switches[i].countdown = 0;
-      controlChange(1,switches[i].effect,1);
+      if (switches[i].effect_toggle == 0) {
+        controlChange(1,switches[i].effect,1);
+      } else if (switches[i].toggled) {
+        controlChange(1,switches[i].effect,1);
+        switches[i].toggled = false;
+      } else {
+        controlChange(1,switches[i].effect_toggle,1);
+        switches[i].toggled = true;
+      }
+      
       #ifdef DEBUG
          Serial.print("Single click SW");
          Serial.println(switches[i].pin);
       #endif
       MidiUSB.flush();
     }
-    /*
-      switches[i].countdown = double_interval
-      controlChange(1,switches[i].effect,1);
-      switches[i].pressed = false;
-      #ifdef DEBUG
-        Serial.print("Pressed SW");
-        Serial.println(switches[i].pin);
-      #endif
-      MidiUSB.flush();
-    }*/
+
   }
 }
