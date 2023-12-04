@@ -12,7 +12,7 @@ struct analogControl {
   int prev_value;
   const byte effect;
 };
-
+/*
 analogControl slider_0 = {A0,0,0,7};
 analogControl slider_1 = {A1,0,0,8};
 analogControl slider_2 = {A2,0,0,9};
@@ -26,8 +26,10 @@ analogControl knob_4 = {A10,0,0,5};
 analogControl knob_5 = {A11,0,0,6};
 
 
-analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};
-const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
+analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};*/
+analogControl analog_controls[] = {};
+//const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
+const int active_analog_controls = 0;
 
 //digital encoders, the fd is forward, bk backward effects, clk should be triggers pins
 struct rotaryEncoder {
@@ -39,36 +41,43 @@ struct rotaryEncoder {
   const int effect_fd;
   const int effect_bk;
 };
-
+/*
 rotaryEncoder rE_0 = {2,4,0,false,EncoderButton (2,4),10,11};
 rotaryEncoder rE_1 = {3,5,0,false,EncoderButton (3,5),12,13};
 rotaryEncoder rE_2 = {0,1,0,false,EncoderButton (0,1),18,19};
 
-rotaryEncoder rotary_encoders[] = {rE_0,rE_1,rE_2};
-const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
+rotaryEncoder rotary_encoders[] = {rE_0,rE_1,rE_2};*/
+rotaryEncoder rotary_encoders[] = {};
+//const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
+const int active_encoders = 0;
 
-//digital switches, double_interval is the interval of double clicks, if effect_double is 0 the button is immediate, toggle send two different messages for odd and even strokes
-const int double_interval = 400;
+//digital switches, long_inteval is the interval of long clicks, if effect_long is 0 the button is immediate, toggle send two different messages for odd and even strokes
+const int long_interval = 1000;
 
 struct digitalButton  {
   const int pin;
   bool pressed;
   long debounce;
-  int pres_state;
+ // int pres_state;
   long countdown;
   const byte effect;
   const byte effect_toggle;
   bool toggled;
-  const byte effect_double;
+  const byte effect_long;
+  const byte effect_long_toggle;
+  bool long_toggled;
+  bool long_pressed;
 };
 
-digitalButton sw0 = {9,false,0,0,LOW,14,0,false,0};
-digitalButton sw1 = {11,false,0,0,LOW,15,0,false,0};
-digitalButton sw2 = {8,false,0,0,LOW,16,0,false,23};
-digitalButton sw3 = {7,false,0,0,LOW,17,0,false,24};
-digitalButton sw4 = {13,false,0,0,LOW,25,26,false,20};
+digitalButton sw0 = {9,false,0,0,14,0,false,0,30,false,false};
+//digitalButton sw0 = {9,false,0,LOW,0,14,0,false,0,false};
+/*digitalButton sw1 = {11,false,0,LOW,0,15,0,false,0,false};
+digitalButton sw2 = {8,false,0,LOW,0,16,0,false,23,false};
+digitalButton sw3 = {7,false,0,LOW,0,17,0,false,24,false};
+digitalButton sw4 = {13,false,0,LOW,0,25,26,false,20,false};*/
 
-digitalButton switches[] = {sw0,sw1,sw2,sw3,sw4};
+//digitalButton switches[] = {sw0,sw1,sw2,sw3,sw4};
+digitalButton switches[] = {sw0};
 const int active_switches = sizeof(switches)/sizeof(switches[0]);
 
 //midi
@@ -168,57 +177,68 @@ void loop() {
 
   //switches
   for (int i = 0; i < active_switches; i++) {
-    if (digitalRead(switches[i].pin) == switches[i].pres_state) {
+    if (digitalRead(switches[i].pin) == HIGH && switches[i].pressed == false) {
       switches[i].pressed = true;
+      switches[i].long_pressed = false;
       switches[i].debounce = millis();
     }
-    if (switches[i].pressed && (millis() - switches[i].debounce > 10) && digitalRead(switches[i].pin) != switches[i].pres_state) {
-      if (switches[i].effect_double == 0) {
-        if (switches[i].effect_toggle == 0) {
+    if (switches[i].pressed && (millis() - switches[i].debounce <= 10) && digitalRead(switches[i].pin) == LOW) {
+      switches[i].pressed = false;
+      continue;
+    }
+    if (switches[i].pressed && (millis() - switches[i].debounce > 10) && digitalRead(switches[i].pin) == LOW) {
+        if (switches[i].long_pressed == true) {
+          switches[i].long_pressed = false;
+        } else if (switches[i].effect_toggle == 0) {
           controlChange(1,switches[i].effect,1);
+          #ifdef DEBUG
+            Serial.print("Release SW ");
+            Serial.println(switches[i].pin);
+          #endif
         } else if (switches[i].toggled) {
           controlChange(1,switches[i].effect,1);
           switches[i].toggled = false;
+          #ifdef DEBUG
+            Serial.print("Release SW - toggle 0 ");
+            Serial.println(switches[i].pin);
+          #endif
         } else {
           controlChange(1,switches[i].effect_toggle,1);
           switches[i].toggled = true;
+          #ifdef DEBUG
+            Serial.print("Release SW - toggle 1 ");
+            Serial.println(switches[i].pin);
+          #endif
         }
-        #ifdef DEBUG
-         Serial.print("Click SW");
-         Serial.println(switches[i].pin);
-        #endif
-        MidiUSB.flush();        
-      } else if (switches[i].countdown > 0) {
-        switches[i].countdown = 0;
-        controlChange(1,switches[i].effect_double,1);
-        #ifdef DEBUG
-          Serial.print("Double click SW");
-          Serial.println(switches[i].pin);
-        #endif
-        MidiUSB.flush();
-      } else {
-        switches[i].countdown = millis();
-      }
+
+      MidiUSB.flush();        
       switches[i].pressed = false;
     }
-    if (switches[i].countdown > 0 and millis() - switches[i].countdown > double_interval) {
-      switches[i].countdown = 0;
-      if (switches[i].effect_toggle == 0) {
-        controlChange(1,switches[i].effect,1);
-      } else if (switches[i].toggled) {
-        controlChange(1,switches[i].effect,1);
-        switches[i].toggled = false;
+    if (switches[i].pressed && (millis() - switches[i].debounce > long_interval) && (digitalRead(switches[i].pin) == HIGH) && (switches[i].long_pressed == false)) {
+      switches[i].long_pressed = true;
+      if (switches[i].effect_long_toggle == 0) {
+        controlChange(1,switches[i].effect_long,1);
+        #ifdef DEBUG
+          Serial.print("Long press SW ");
+          Serial.println(switches[i].pin);
+        #endif
+      } else if (switches[i].long_toggled) {
+        controlChange(1,switches[i].effect_long,1);
+        switches[i].long_toggled = false;
+        #ifdef DEBUG
+          Serial.print("Long press SW - toggle 0 ");
+          Serial.println(switches[i].pin);
+        #endif        
       } else {
-        controlChange(1,switches[i].effect_toggle,1);
-        switches[i].toggled = true;
+        controlChange(1,switches[i].effect_long_toggle,1);
+        switches[i].long_toggled = true;
+        #ifdef DEBUG
+          Serial.print("Long press SW - toggle 1 ");
+          Serial.println(switches[i].pin);
+        #endif                
       }
-      
-      #ifdef DEBUG
-         Serial.print("Single click SW");
-         Serial.println(switches[i].pin);
-      #endif
       MidiUSB.flush();
+      
     }
-
   }
 }
