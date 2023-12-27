@@ -5,23 +5,28 @@
 /* This is a sketch that it transforms your Arduino Leonardo or Leonardo like (i.e. boards with atmega32u4) in a MIDI console for interfacing
  * with Mixxx (https://mixxx.org). Perhaps you can also use an UNO but you have to sacrifice some pins in order to add a MIDI interface to your Arduino.
  * Once you have flashed the board, you have to train Mixxx in Preferences/Controllers menu.
+ * Remember to plug the Arduino before launching Mixxx, otherwise it won't be detected.
  * 
- * This software is released under the Unlicense (see LICENSE for more info)
+ * This software is released under the Unlicense (see LICENSE for more info).
  * 
  * Last revision 27-dec-2023
  */
 
-// uncomment this line if you want pin and values printed on the serial, remember to open a console because otherwise it waits until a connection is established
-// #define DEBUG
+// Uncomment this line if you want pin and values printed on the serial, remember to open a console because otherwise it waits until a connection is established.
+ #define DEBUG
 
-//analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect
-const int dead_zone = 9;
+// Analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect.
+const int dead_zone = 10;
+
+// Stickyness is a deazone that lies around extreme positions (0-1023) and the middle (511, but trimmable) of readings.
+const int stickyness = 30;
 
 struct analogControl {
   const int pin;
   int value;
   int prev_value;
   const byte effect;
+  const int middle;
 };
 
 /* Connect linear potentiometers (sliders and knobs) to Analog Inputs on your board.
@@ -33,29 +38,34 @@ struct analogControl {
  * Mixxx, it's not important but every control need to have a unique number.
 */
 
-/*
-analogControl slider_0 = {A0,0,0,7};
-analogControl slider_1 = {A1,0,0,8};
-analogControl slider_2 = {A2,0,0,9};
+//If you aren't using any analog controls, comment these lines.
+const int analog_controls_pins[] = {A0,A1,A2,A3,A4,A5,A7,A10,A11};
+const int analog_controls_effects[] = {7,8,9,1,2,3,4,5,6};
 
-analogControl knob_0 = {A3,0,0,1};
-analogControl knob_1 = {A4,0,0,2};
-analogControl knob_2 = {A5,0,0,3};
+analogControl analog_controls[] = {
+  analogControl {analog_controls_pins[0],0,0,analog_controls_effects[0],511},
+  analogControl {analog_controls_pins[1],0,0,analog_controls_effects[1],520},
+  analogControl {analog_controls_pins[2],0,0,analog_controls_effects[2],520},
+  
+  analogControl {analog_controls_pins[3],0,0,analog_controls_effects[3],511},
+  analogControl {analog_controls_pins[4],0,0,analog_controls_effects[4],511},
+  analogControl {analog_controls_pins[5],0,0,analog_controls_effects[5],511},
+  
+  analogControl {analog_controls_pins[6],0,0,analog_controls_effects[6],511},
+  analogControl {analog_controls_pins[7],0,0,analog_controls_effects[7],511},
+  analogControl {analog_controls_pins[8],0,0,analog_controls_effects[8],511},
+};
+const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
 
-analogControl knob_3 = {A7,0,0,4};
-analogControl knob_4 = {A10,0,0,5};
-analogControl knob_5 = {A11,0,0,6};
-*/
+//These lines disable analog controls if uncommented.
+//analogControl analog_controls[] = {}; 
+//const int active_analog_controls = 0;
 
-// If you aren't using any analog controls, comment these lines
-//analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};
-//const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
-
-// If you're using analog controls, comment these lines.
-analogControl analog_controls[] = {}; 
-const int active_analog_controls = 0;
-
-//digital encoders, the fd is forward, bk backward effects, clk should be triggers pins
+/* Rotary Encorders needs two pins. 
+ * clk should be interrupts. On Leonardo interrups are on pin 0, 1, 2, 3 and 7.
+ * dt are digital pins
+ * effect_fd and effect_bk have to be unique
+ */ 
 struct rotaryEncoder {
   const int clk;
   const int dt;
@@ -66,35 +76,32 @@ struct rotaryEncoder {
   const int effect_bk;
 };
 
-/* Rotary Encorders needs two pins. 
- * clk should be interrupts. On Leonardo interrups are on pin 0, 1, 2, 3 and 7.
- * dt are digital pins
- * You have to put the pin numbers both on struct parameters and in the EncoderButton eb object
- * effect_fd and effect_bk have to be unique
- */
- 
-/*
-rotaryEncoder rE_0 = {2,4,0,false,EncoderButton (2,4),10,11};
-rotaryEncoder rE_1 = {3,5,0,false,EncoderButton (3,5),12,13};
-rotaryEncoder rE_2 = {0,1,0,false,EncoderButton (0,1),18,19};
-*/
+//Comment these lines if you don't have any rotary encoders.
+const int rot_clk_pins[] = {2,3,0};
+const int rot_dt_pins[] = {4,5,1};
+const int rot_effect_fd[] = {10,12,18};
+const int rot_effect_bk[] = {11,13,19};
 
-//Comment these lines if you don't have any rotary encoders
-//rotaryEncoder rotary_encoders[] = {rE_0,rE_1,rE_2};
-//const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
+rotaryEncoder rotary_encoders[] = {
+ {rot_clk_pins[0],rot_dt_pins[0],0,false,EncoderButton (rot_clk_pins[0],rot_dt_pins[0]),rot_effect_fd[0],rot_effect_bk[0]},
+ {rot_clk_pins[1],rot_dt_pins[1],0,false,EncoderButton (rot_clk_pins[1],rot_dt_pins[1]),rot_effect_fd[1],rot_effect_bk[1]},
+ {rot_clk_pins[2],rot_dt_pins[2],0,false,EncoderButton (rot_clk_pins[2],rot_dt_pins[2]),rot_effect_fd[2],rot_effect_bk[2]},
+};
+const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 
-//Comment these lines if you want your rotary encoders enabled
-rotaryEncoder rotary_encoders[] = {};
-const int active_encoders = 0;
+//These lines disable rotary encoders if uncommented.
+//rotaryEncoder rotary_encoders[] = {};
+//const int active_encoders = 0;
 
-//digital switches, long_inteval is the interval of long clicks, if effect_long is 0 the button is immediate, toggle send two different messages for odd and even strokes
+// Digital buttons are connected to a digital pin. If you use toggle, long press or long press toggle rembember that the MIDI message byte has to be unique.
+// long_inteval is the interval of long clicks, toggle and long_toggle (for long presses) send two different messages for odd and even strokes
+// if their effect is 0 the toggle, long press or long press toggle is disabled.
 const int long_interval = 1000;
 
 struct digitalButton  {
   const int pin;
   bool pressed;
   long debounce;
- // int pres_state;
   long countdown;
   const byte effect;
   const byte effect_toggle;
@@ -105,23 +112,26 @@ struct digitalButton  {
   bool long_pressed;
 };
 
-// Digital buttons are connected to a digital pin. If you use toggle, long press or long press toggle rembember that the MIDI message byte has to be unique.
-/*digitalButton sw0 = {9,false,0,0,14,0,false,0,30,false,false};
-digitalButton sw0 = {9,false,0,LOW,0,14,0,false,0,false};
-digitalButton sw1 = {11,false,0,LOW,0,15,0,false,0,false};
-digitalButton sw2 = {8,false,0,LOW,0,16,0,false,23,false};
-digitalButton sw3 = {7,false,0,LOW,0,17,0,false,24,false};
-digitalButton sw4 = {13,false,0,LOW,0,25,26,false,20,false};*/
+//Comment these lines if you don't use switches.
+const int button_pins[] = {9,11,8,7,13};
+const int button_effect[] = {14,15,16,17,20};
+const int button_effect_toggle[] = {0,0,0,0,0};
+const int button_effect_long[] {0,0,23,24,25};
+const int button_effect_toggle_long[] {0,0,0,0,26};
+digitalButton switches[] = {
+  {button_pins[0],false,0,0,button_effect[0],button_effect_toggle[0],false,button_effect_long[0],button_effect_toggle_long[0],false,false},
+  {button_pins[1],false,0,0,button_effect[1],button_effect_toggle[1],false,button_effect_long[1],button_effect_toggle_long[1],false,false},
+  {button_pins[2],false,0,0,button_effect[2],button_effect_toggle[2],false,button_effect_long[2],button_effect_toggle_long[2],false,false},
+  {button_pins[3],false,0,0,button_effect[3],button_effect_toggle[3],false,button_effect_long[3],button_effect_toggle_long[3],false,false},
+  {button_pins[4],false,0,0,button_effect[4],button_effect_toggle[4],false,button_effect_long[4],button_effect_toggle_long[4],false,false}
+};
+const int active_switches = sizeof(switches)/sizeof(switches[0]);
 
-//Comment these lines if you don't use switches
-//digitalButton switches[] = {sw0,sw1,sw2,sw3,sw4};
-//const int active_switches = sizeof(switches)/sizeof(switches[0]);
+//These lines disables digital buttons.
+//digitalButton switches[] = {};
+//const int active_switches = 0;
 
-//Comment these lines if you are using switches
-digitalButton switches[] = {};
-const int active_switches = 0;
-
-//midi
+// MIDI
 byte midi_value;
 
 // First parameter is the event type (0x09 = note on, 0x08 = note off).
@@ -175,12 +185,17 @@ void setup() {
   }
 }
 
-
 void loop() {
-
-  //analog controls
+  // Analog controls check.
   for (int i = 0; i < active_analog_controls; i++) {
-    analog_controls[i].value = analogRead(analog_controls[i].pin);    
+    analog_controls[i].value = analogRead(analog_controls[i].pin);
+    if (analog_controls[i].value < 0+stickyness){
+        analog_controls[i].value = 0;
+    } else if (analog_controls[i].value > 1023-stickyness) {
+        analog_controls[i].value = 1023;
+    } else if (analog_controls[i].value > analog_controls[i].middle-stickyness && analog_controls[i].value < analog_controls[i].middle+stickyness) {
+        analog_controls[i].value = analog_controls[i].middle;
+    }
     if ( abs(analog_controls[i].value - analog_controls[i].prev_value) > dead_zone ){
       midi_value = map(analog_controls[i].value,0,1023,0,127);
       controlChange(1,analog_controls[i].effect,midi_value);
@@ -197,7 +212,7 @@ void loop() {
     }
   }
   
-  //rotary encoders
+  // Rotary encoders check.
   for (int i = 0; i < active_encoders; i++) {
     rotary_encoders[i].eb.update();  
     if(rotary_encoders[i].val_changed) {
@@ -216,18 +231,22 @@ void loop() {
     }
   }
 
-  //switches
+  // Switches check.
   for (int i = 0; i < active_switches; i++) {
-    if (digitalRead(switches[i].pin) == HIGH && switches[i].pressed == false) {
+    if (digitalRead(switches[i].pin) == LOW && switches[i].pressed == false) {
       switches[i].pressed = true;
       switches[i].long_pressed = false;
       switches[i].debounce = millis();
+      #ifdef DEBUG
+        Serial.print("Press SW ");
+        Serial.println(switches[i].pin);
+      #endif DEBUG
     }
-    if (switches[i].pressed && (millis() - switches[i].debounce <= 10) && digitalRead(switches[i].pin) == LOW) {
+    if (switches[i].pressed && (millis() - switches[i].debounce <= 10) && digitalRead(switches[i].pin) == HIGH) {
       switches[i].pressed = false;
       continue;
     }
-    if (switches[i].pressed && (millis() - switches[i].debounce > 10) && digitalRead(switches[i].pin) == LOW) {
+    if (switches[i].pressed && (millis() - switches[i].debounce > 10) && digitalRead(switches[i].pin) == HIGH) {
         if (switches[i].long_pressed == true) {
           switches[i].long_pressed = false;
         } else if (switches[i].effect_toggle == 0) {
@@ -255,7 +274,7 @@ void loop() {
       MidiUSB.flush();        
       switches[i].pressed = false;
     }
-    if (switches[i].pressed && (millis() - switches[i].debounce > long_interval) && (digitalRead(switches[i].pin) == HIGH) && (switches[i].long_pressed == false)) {
+    if (switches[i].pressed && (millis() - switches[i].debounce > long_interval) && (digitalRead(switches[i].pin) == LOW) && (switches[i].long_pressed == false)) {
       switches[i].long_pressed = true;
       if (switches[i].effect_long_toggle == 0) {
         controlChange(1,switches[i].effect_long,1);
