@@ -1,7 +1,18 @@
 #include "Arduino.h"
 #include "MIDIUSB.h"
 #include <EncoderButton.h>
-#define DEBUG
+
+/* This is a sketch that it transforms your Arduino Leonardo or Leonardo like (i.e. boards with atmega32u4) in a MIDI console for interfacing
+ * with Mixxx (https://mixxx.org). Perhaps you can also use an UNO but you have to sacrifice some pins in order to add a MIDI interface to your Arduino.
+ * Once you have flashed the board, you have to train Mixxx in Preferences/Controllers menu.
+ * 
+ * This software is released under the Unlicense (see LICENSE for more info)
+ * 
+ * Last revision 27-dec-2023
+ */
+
+// uncomment this line if you want pin and values printed on the serial, remember to open a console because otherwise it waits until a connection is established
+// #define DEBUG
 
 //analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect
 const int dead_zone = 9;
@@ -12,6 +23,16 @@ struct analogControl {
   int prev_value;
   const byte effect;
 };
+
+/* Connect linear potentiometers (sliders and knobs) to Analog Inputs on your board.
+ * On Leonardo, from A0 to A5 are on the left (with USB on top)
+ * A6, A7, A8, A9, A10 and A11 are digital pins
+ *  4,  6,  8,  9,  10,     12.
+ *  
+ * Change the first value accordingly, the last one is the MIDI effect that is sent to
+ * Mixxx, it's not important but every control need to have a unique number.
+*/
+
 /*
 analogControl slider_0 = {A0,0,0,7};
 analogControl slider_1 = {A1,0,0,8};
@@ -24,11 +45,14 @@ analogControl knob_2 = {A5,0,0,3};
 analogControl knob_3 = {A7,0,0,4};
 analogControl knob_4 = {A10,0,0,5};
 analogControl knob_5 = {A11,0,0,6};
+*/
 
-
-analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};*/
-analogControl analog_controls[] = {};
+// If you aren't using any analog controls, comment these lines
+//analogControl analog_controls[] = {slider_0,slider_1,slider_2,knob_0,knob_1,knob_2,knob_3,knob_4,knob_5};
 //const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
+
+// If you're using analog controls, comment these lines.
+analogControl analog_controls[] = {}; 
 const int active_analog_controls = 0;
 
 //digital encoders, the fd is forward, bk backward effects, clk should be triggers pins
@@ -41,14 +65,26 @@ struct rotaryEncoder {
   const int effect_fd;
   const int effect_bk;
 };
+
+/* Rotary Encorders needs two pins. 
+ * clk should be interrupts. On Leonardo interrups are on pin 0, 1, 2, 3 and 7.
+ * dt are digital pins
+ * You have to put the pin numbers both on struct parameters and in the EncoderButton eb object
+ * effect_fd and effect_bk have to be unique
+ */
+ 
 /*
 rotaryEncoder rE_0 = {2,4,0,false,EncoderButton (2,4),10,11};
 rotaryEncoder rE_1 = {3,5,0,false,EncoderButton (3,5),12,13};
 rotaryEncoder rE_2 = {0,1,0,false,EncoderButton (0,1),18,19};
+*/
 
-rotaryEncoder rotary_encoders[] = {rE_0,rE_1,rE_2};*/
-rotaryEncoder rotary_encoders[] = {};
+//Comment these lines if you don't have any rotary encoders
+//rotaryEncoder rotary_encoders[] = {rE_0,rE_1,rE_2};
 //const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
+
+//Comment these lines if you want your rotary encoders enabled
+rotaryEncoder rotary_encoders[] = {};
 const int active_encoders = 0;
 
 //digital switches, long_inteval is the interval of long clicks, if effect_long is 0 the button is immediate, toggle send two different messages for odd and even strokes
@@ -69,16 +105,21 @@ struct digitalButton  {
   bool long_pressed;
 };
 
-digitalButton sw0 = {9,false,0,0,14,0,false,0,30,false,false};
-//digitalButton sw0 = {9,false,0,LOW,0,14,0,false,0,false};
-/*digitalButton sw1 = {11,false,0,LOW,0,15,0,false,0,false};
+// Digital buttons are connected to a digital pin. If you use toggle, long press or long press toggle rembember that the MIDI message byte has to be unique.
+/*digitalButton sw0 = {9,false,0,0,14,0,false,0,30,false,false};
+digitalButton sw0 = {9,false,0,LOW,0,14,0,false,0,false};
+digitalButton sw1 = {11,false,0,LOW,0,15,0,false,0,false};
 digitalButton sw2 = {8,false,0,LOW,0,16,0,false,23,false};
 digitalButton sw3 = {7,false,0,LOW,0,17,0,false,24,false};
 digitalButton sw4 = {13,false,0,LOW,0,25,26,false,20,false};*/
 
+//Comment these lines if you don't use switches
 //digitalButton switches[] = {sw0,sw1,sw2,sw3,sw4};
-digitalButton switches[] = {sw0};
-const int active_switches = sizeof(switches)/sizeof(switches[0]);
+//const int active_switches = sizeof(switches)/sizeof(switches[0]);
+
+//Comment these lines if you are using switches
+digitalButton switches[] = {};
+const int active_switches = 0;
 
 //midi
 byte midi_value;
