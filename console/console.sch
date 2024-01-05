@@ -1,0 +1,181 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L MCU_Module:Arduino_Leonardo A?
+U 1 1 65974FEC
+P 5750 2600
+F 0 "A?" H 5750 3781 50  0000 C CNN
+F 1 "Arduino_Leonardo" H 5750 3690 50  0000 C CNN
+F 2 "Module:Arduino_UNO_R3" H 5750 2600 50  0001 C CIN
+F 3 "https://www.arduino.cc/en/Main/ArduinoBoardLeonardo" H 5750 2600 50  0001 C CNN
+	1    5750 2600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 65976467
+P 3900 1850
+F 0 "RV?" H 3831 1896 50  0000 R CNN
+F 1 "R_POT" H 3831 1805 50  0000 R CNN
+F 2 "" H 3900 1850 50  0001 C CNN
+F 3 "~" H 3900 1850 50  0001 C CNN
+	1    3900 1850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 65976A6B
+P 3900 2400
+F 0 "RV?" H 3831 2446 50  0000 R CNN
+F 1 "R_POT" H 3831 2355 50  0000 R CNN
+F 2 "" H 3900 2400 50  0001 C CNN
+F 3 "~" H 3900 2400 50  0001 C CNN
+	1    3900 2400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 65976F71
+P 3900 3000
+F 0 "RV?" H 3831 3046 50  0000 R CNN
+F 1 "R_POT" H 3831 2955 50  0000 R CNN
+F 2 "" H 3900 3000 50  0001 C CNN
+F 3 "~" H 3900 3000 50  0001 C CNN
+	1    3900 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 659775A2
+P 4350 1800
+F 0 "RV?" H 4281 1846 50  0000 R CNN
+F 1 "R_POT" H 4281 1755 50  0000 R CNN
+F 2 "" H 4350 1800 50  0001 C CNN
+F 3 "~" H 4350 1800 50  0001 C CNN
+	1    4350 1800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 659779F0
+P 4350 2300
+F 0 "RV?" H 4281 2346 50  0000 R CNN
+F 1 "R_POT" H 4281 2255 50  0000 R CNN
+F 2 "" H 4350 2300 50  0001 C CNN
+F 3 "~" H 4350 2300 50  0001 C CNN
+	1    4350 2300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 65977E3F
+P 4350 2850
+F 0 "RV?" H 4281 2896 50  0000 R CNN
+F 1 "R_POT" H 4281 2805 50  0000 R CNN
+F 2 "" H 4350 2850 50  0001 C CNN
+F 3 "~" H 4350 2850 50  0001 C CNN
+	1    4350 2850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 6597BADA
+P 3200 1900
+F 0 "RV?" H 3131 1946 50  0000 R CNN
+F 1 "R_POT" H 3131 1855 50  0000 R CNN
+F 2 "" H 3200 1900 50  0001 C CNN
+F 3 "~" H 3200 1900 50  0001 C CNN
+	1    3200 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 6597BAE0
+P 3200 2450
+F 0 "RV?" H 3131 2496 50  0000 R CNN
+F 1 "R_POT" H 3131 2405 50  0000 R CNN
+F 2 "" H 3200 2450 50  0001 C CNN
+F 3 "~" H 3200 2450 50  0001 C CNN
+	1    3200 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 6597BAE6
+P 3200 3050
+F 0 "RV?" H 3131 3096 50  0000 R CNN
+F 1 "R_POT" H 3131 3005 50  0000 R CNN
+F 2 "" H 3200 3050 50  0001 C CNN
+F 3 "~" H 3200 3050 50  0001 C CNN
+	1    3200 3050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Switch:SW_Push SW?
+U 1 1 6597BE83
+P 3350 3750
+F 0 "SW?" H 3350 4035 50  0000 C CNN
+F 1 "SW_Push" H 3350 3944 50  0000 C CNN
+F 2 "" H 3350 3950 50  0001 C CNN
+F 3 "~" H 3350 3950 50  0001 C CNN
+	1    3350 3750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Switch:SW_Push SW?
+U 1 1 6597C315
+P 4050 3700
+F 0 "SW?" H 4050 3985 50  0000 C CNN
+F 1 "SW_Push" H 4050 3894 50  0000 C CNN
+F 2 "" H 4050 3900 50  0001 C CNN
+F 3 "~" H 4050 3900 50  0001 C CNN
+	1    4050 3700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Rotary_Encoder_Switch SW?
+U 1 1 6597C931
+P 7150 2050
+F 0 "SW?" H 7150 2417 50  0000 C CNN
+F 1 "Rotary_Encoder_Switch" H 7150 2326 50  0000 C CNN
+F 2 "" H 7000 2210 50  0001 C CNN
+F 3 "~" H 7150 2310 50  0001 C CNN
+	1    7150 2050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Rotary_Encoder_Switch SW?
+U 1 1 6597D2A5
+P 7100 2900
+F 0 "SW?" H 7100 3267 50  0000 C CNN
+F 1 "Rotary_Encoder_Switch" H 7100 3176 50  0000 C CNN
+F 2 "" H 6950 3060 50  0001 C CNN
+F 3 "~" H 7100 3160 50  0001 C CNN
+	1    7100 2900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Rotary_Encoder_Switch SW?
+U 1 1 6597DC98
+P 7000 3600
+F 0 "SW?" H 7000 3967 50  0000 C CNN
+F 1 "Rotary_Encoder_Switch" H 7000 3876 50  0000 C CNN
+F 2 "" H 6850 3760 50  0001 C CNN
+F 3 "~" H 7000 3860 50  0001 C CNN
+	1    7000 3600
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC
