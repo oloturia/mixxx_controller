@@ -12,7 +12,7 @@
  * Last revision 27-dec-2023
  */
 
-// Uncomment this line if you want pin and values printed on the serial, remember to open a console because otherwise it waits until a connection is established.
+// Uncomment this line if you want pin and values printed on the serial, remember to open a console because it waits until a connection is established.
  #define DEBUG
 
 // Analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect.
@@ -31,11 +31,11 @@ struct analogControl {
 
 /* Connect linear potentiometers (sliders and knobs) to Analog Inputs on your board.
  * On Leonardo, from A0 to A5 are on the left (with USB on top)
- * A6, A7, A8, A9, A10 and A11 are digital pins
+ * A6, A7, A8, A9, A10 and A11 are digital pins:
  *  4,  6,  8,  9,  10,     12.
  *  
  * Change the first value accordingly, the last one is the MIDI effect that is sent to
- * Mixxx, it's not important but every control need to have a unique number.
+ * Mixxx, every control needs to have a unique number.
 */
 
 //If you aren't using any analog controls, comment these lines.
@@ -61,8 +61,8 @@ const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_control
 //analogControl analog_controls[] = {}; 
 //const int active_analog_controls = 0;
 
-/* Rotary Encorders needs two pins. 
- * clk should be interrupts. On Leonardo interrups are on pin 0, 1, 2, 3 and 7.
+/* Rotary Encorders need two pins. 
+ * clk should be an interrupt. On Leonardo interrupts are on pin 0, 1, 2, 3 and 7.
  * dt are digital pins
  * effect_fd and effect_bk have to be unique
  */ 
@@ -93,9 +93,10 @@ const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 //rotaryEncoder rotary_encoders[] = {};
 //const int active_encoders = 0;
 
-// Digital buttons are connected to a digital pin. If you use toggle, long press or long press toggle rembember that the MIDI message byte has to be unique.
-// long_inteval is the interval of long clicks, toggle and long_toggle (for long presses) send two different messages for odd and even strokes
-// if their effect is 0 the toggle, long press or long press toggle is disabled.
+/* Digital buttons are connected to a digital pin. If you use toggle, long press or long press toggle rembember that the MIDI message byte has to be unique.
+ * long_inteval is the interval of long clicks, toggle and long_toggle (for long presses) send two different messages for odd and even strokes.
+ * If effect is 0 the toggle, long press or long press toggle is disabled. 
+ */
 const int long_interval = 1000;
 
 struct digitalButton  {
