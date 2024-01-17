@@ -138,6 +138,7 @@ const int mux_pins[][4] = {{4,5,6,7}};
 mux muxes[] = {
   {mux_signal[0],mux_pins[0][0],mux_pins[0][1],mux_pins[0][2],mux_pins[0][3]}
 };
+const int active_muxes = sizeof(muxes)/sizeof(muxes[0]);
 
 //for every multiplexer, up to 16 different analog controllers are allowed
 const int selectors[] = {0,1,2,3,4,5,6,7,8};
@@ -222,6 +223,13 @@ void setup() {
     Serial.println("RDY");
   #endif
 
+  for (int i = 0; i < active_muxes; i++) {
+    pinMode(muxes[i].pinS0,INPUT);
+    pinMode(muxes[i].pinS1,INPUT);
+    pinMode(muxes[i].pinS2,INPUT);
+    pinMode(muxes[i].pinS3,INPUT);
+  }
+
   for (int i = 0; i < active_switches; i++) {
     pinMode(switches[i].pin,INPUT_PULLUP);
   }
@@ -246,18 +254,44 @@ void loop() {
       midi_value = map(analog_controls[i].value,0,1023,0,127);
       controlChange(1,analog_controls[i].effect,midi_value);
       #ifdef DEBUG
-        Serial.print("Sent ");
+        Serial.print("Analog ");
         Serial.print(analog_controls[i].effect);
         Serial.print(",");      
-        Serial.print(analog_controls[i].value);
-        Serial.print(",");
-        Serial.println( abs(analog_controls[i].value - analog_controls[i].prev_value) );
+        Serial.println(analog_controls[i].value);
       #endif
       analog_controls[i].prev_value = analog_controls[i].value;
       MidiUSB.flush();
     }
   }
-  
+
+  // Analog signal from multiplexer check.
+  for (int i = 0; i < active_mux_inputs; i++) {
+    digitalWrite(mux_inputs[i].ph_mux.pinS0,bitRead(mux_inputs[i].selector,0));
+    digitalWrite(mux_inputs[i].ph_mux.pinS1,bitRead(mux_inputs[i].selector,1));
+    digitalWrite(mux_inputs[i].ph_mux.pinS2,bitRead(mux_inputs[i].selector,2));
+    digitalWrite(mux_inputs[i].ph_mux.pinS3,bitRead(mux_inputs[i].selector,3));
+    mux_inputs[i].value = analogRead(mux_inputs[i].ph_mux.pinSIG);
+    if (mux_inputs[i].value < 0+stickyness){
+      mux_inputs[i].value = 0;
+    } else if (mux_inputs[i].value > 1023-stickyness) {
+      mux_inputs[i].value = 1023;
+    } else if (mux_inputs[i].value > mux_inputs[i].middle-stickyness && mux_inputs[i].value < mux_inputs[i].middle+stickyness) {
+      mux_inputs[i].value = mux_inputs[i].middle;
+    }
+    if ( abs(mux_inputs[i].value - mux_inputs[i].prev_value) > dead_zone ){
+      midi_value = map(mux_inputs[i].value,0,1023,0,127);
+      controlChange(1,mux_inputs[i].effect,midi_value);
+      #ifdef DEBUG
+        Serial.print("Mux ");
+        Serial.print(mux_inputs[i].effect);
+        Serial.print(", ");
+        Serial.println(mux_inputs[i].value);
+      #endif
+      mux_inputs[i].prev_value = mux_inputs[i].value;
+      MidiUSB.flush();
+    }
+    
+  }
   // Rotary encoders check.
   for (int i = 0; i < active_encoders; i++) {
     rotary_encoders[i].eb.update();  
