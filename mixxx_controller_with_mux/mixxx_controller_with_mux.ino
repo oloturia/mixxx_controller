@@ -9,10 +9,13 @@
  * 
  * This software is released under the Unlicense (see LICENSE for more info).
  * 
- * Last revision 27-dec-2023
+ * This version allow the use of multiplexers for analog inputs, this feature is not tested yet.
+ * If you have doubts, use mixxx_controller.ino instead.
+ * 
+ * Last revision 17-jan-2023
  */
 
-// Uncomment this line if you want pin and values printed on the serial, remember to open a console because otherwise it waits until a connection is established.
+// Uncomment this line if you want pin and values printed on the serial, remember to open a console because it waits until a connection is established.
  #define DEBUG
 
 // Analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect.
@@ -31,11 +34,11 @@ struct analogControl {
 
 /* Connect linear potentiometers (sliders and knobs) to Analog Inputs on your board.
  * On Leonardo, from A0 to A5 are on the left (with USB on top)
- * A6, A7, A8, A9, A10 and A11 are digital pins
+ * A6, A7, A8, A9, A10 and A11 are digital pins:
  *  4,  6,  8,  9,  10,     12.
  *  
  * Change the first value accordingly, the last one is the MIDI effect that is sent to
- * Mixxx, it's not important but every control need to have a unique number.
+ * Mixxx, every control needs to have a unique number.
 */
 
 //If you aren't using any analog controls, comment these lines.
@@ -62,8 +65,8 @@ const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_control
 analogControl analog_controls[] = {}; 
 const int active_analog_controls = 0;
 
-/* Rotary Encorders needs two pins. 
- * clk should be interrupts. On Leonardo interrups are on pin 0, 1, 2, 3 and 7.
+/* Rotary Encorders need two pins. 
+ * clk should be an interrupts. On Leonardo interrupts are on pin 0, 1, 2, 3 and 7.
  * dt are digital pins
  * effect_fd and effect_bk have to be unique
  */ 
@@ -94,9 +97,10 @@ const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 //rotaryEncoder rotary_encoders[] = {};
 //const int active_encoders = 0;
 
-// Digital buttons are connected to a digital pin. If you use toggle, long press or long press toggle rembember that the MIDI message byte has to be unique.
-// long_inteval is the interval of long clicks, toggle and long_toggle (for long presses) send two different messages for odd and even strokes
-// if their effect is 0 the toggle, long press or long press toggle is disabled.
+/* Digital buttons are connected to a digital pin. If you use toggle, long press or long press toggle rembember that the MIDI message byte has to be unique.
+ * long_inteval is the interval of long clicks, toggle and long_toggle (for long presses) send two different messages for odd and even strokes.
+ * If effect is 0 the toggle, long press or long press toggle is disabled. 
+ */
 const int long_interval = 1000;
 
 struct digitalButton  {
@@ -114,6 +118,30 @@ struct digitalButton  {
 };
 
 
+//Comment these lines if you don't use switches.
+const int button_pins[] = {9,11,8,7,13};
+const int button_effect[] = {14,15,16,17,20};
+const int button_effect_toggle[] = {0,0,0,0,0};
+const int button_effect_long[] {0,0,23,24,25};
+const int button_effect_toggle_long[] {0,0,0,0,26};
+digitalButton switches[] = {
+  {button_pins[0],false,0,0,button_effect[0],button_effect_toggle[0],false,button_effect_long[0],button_effect_toggle_long[0],false,false},
+  {button_pins[1],false,0,0,button_effect[1],button_effect_toggle[1],false,button_effect_long[1],button_effect_toggle_long[1],false,false},
+  {button_pins[2],false,0,0,button_effect[2],button_effect_toggle[2],false,button_effect_long[2],button_effect_toggle_long[2],false,false},
+  {button_pins[3],false,0,0,button_effect[3],button_effect_toggle[3],false,button_effect_long[3],button_effect_toggle_long[3],false,false},
+  {button_pins[4],false,0,0,button_effect[4],button_effect_toggle[4],false,button_effect_long[4],button_effect_toggle_long[4],false,false}
+};
+const int active_switches = sizeof(switches)/sizeof(switches[0]);
+
+//These lines disables digital buttons.
+//digitalButton switches[] = {};
+//const int active_switches = 0;
+
+/* Multiplexers allow multiple analog inputs using only 1 analog input and 4 digital outputs.
+ * pinSIG is the input pin for the signal, pinS0 to pinS3 are the digital outputs that select
+ * the analog channel that will be connected with SIG.
+ * 
+ */
 struct mux{
   const int pinSIG;
   const int pinS0;
@@ -140,7 +168,7 @@ mux muxes[] = {
 };
 const int active_muxes = sizeof(muxes)/sizeof(muxes[0]);
 
-//for every multiplexer, up to 16 different analog controllers are allowed
+//for every multiplexer, up to 16 different analog controllers are allowed, remember that effects need to be unique
 const int selectors[] = {0,1,2,3,4,5,6,7,8};
 const int mux_effects[] = {7,8,9,1,2,3,4,5,6};
 const int mux_middle[] = {511,520,520,511,511,511,511,511};
@@ -159,24 +187,6 @@ mux_selector mux_inputs[] = {
 
 const int active_mux_inputs = sizeof(mux_selector)/sizeof(mux_selector[0]);
 
-//Comment these lines if you don't use switches.
-const int button_pins[] = {9,11,8,7,13};
-const int button_effect[] = {14,15,16,17,20};
-const int button_effect_toggle[] = {0,0,0,0,0};
-const int button_effect_long[] {0,0,23,24,25};
-const int button_effect_toggle_long[] {0,0,0,0,26};
-digitalButton switches[] = {
-  {button_pins[0],false,0,0,button_effect[0],button_effect_toggle[0],false,button_effect_long[0],button_effect_toggle_long[0],false,false},
-  {button_pins[1],false,0,0,button_effect[1],button_effect_toggle[1],false,button_effect_long[1],button_effect_toggle_long[1],false,false},
-  {button_pins[2],false,0,0,button_effect[2],button_effect_toggle[2],false,button_effect_long[2],button_effect_toggle_long[2],false,false},
-  {button_pins[3],false,0,0,button_effect[3],button_effect_toggle[3],false,button_effect_long[3],button_effect_toggle_long[3],false,false},
-  {button_pins[4],false,0,0,button_effect[4],button_effect_toggle[4],false,button_effect_long[4],button_effect_toggle_long[4],false,false}
-};
-const int active_switches = sizeof(switches)/sizeof(switches[0]);
-
-//These lines disables digital buttons.
-//digitalButton switches[] = {};
-//const int active_switches = 0;
 
 // MIDI
 byte midi_value;
