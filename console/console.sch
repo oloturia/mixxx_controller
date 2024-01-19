@@ -14,10 +14,10 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L MCU_Module:Arduino_Leonardo ARDUINO
+L MCU_Module:Arduino_Leonardo ARDUINO1
 U 1 1 65974FEC
 P 5750 2600
-F 0 "ARDUINO" H 5750 3781 50  0000 C CNN
+F 0 "ARDUINO1" H 5750 3781 50  0000 C CNN
 F 1 "Arduino_Leonardo" H 5750 3690 50  0000 C CNN
 F 2 "Module:Arduino_UNO_R3" H 5750 2600 50  0001 C CIN
 F 3 "https://www.arduino.cc/en/Main/ArduinoBoardLeonardo" H 5750 2600 50  0001 C CNN
@@ -25,122 +25,122 @@ F 3 "https://www.arduino.cc/en/Main/ArduinoBoardLeonardo" H 5750 2600 50  0001 C
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Left_BPM
+L Device:R_POT RV_Left_BPM1
 U 1 1 65976467
 P 7000 2850
-F 0 "RV_Left_BPM" H 6931 2896 50  0000 R CNN
+F 0 "RV_Left_BPM1" H 6931 2896 50  0000 R CNN
 F 1 "R_POT" H 6931 2805 50  0000 R CNN
-F 2 "" H 7000 2850 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTA4543_Single_Slide" H 7000 2850 50  0001 C CNN
 F 3 "~" H 7000 2850 50  0001 C CNN
 	1    7000 2850
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Left_Treble
+L Device:R_POT RV_Left_Treble1
 U 1 1 65976A6B
 P 8000 3000
-F 0 "RV_Left_Treble" H 7931 3046 50  0000 R CNN
+F 0 "RV_Left_Treble1" H 7931 3046 50  0000 R CNN
 F 1 "R_POT" H 7931 2955 50  0000 R CNN
-F 2 "" H 8000 3000 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 8000 3000 50  0001 C CNN
 F 3 "~" H 8000 3000 50  0001 C CNN
 	1    8000 3000
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Right_Treble
+L Device:R_POT RV_Right_Treble1
 U 1 1 65976F71
 P 8850 3000
-F 0 "RV_Right_Treble" H 8781 3046 50  0000 R CNN
+F 0 "RV_Right_Treble1" H 8781 3046 50  0000 R CNN
 F 1 "R_POT" H 8781 2955 50  0000 R CNN
-F 2 "" H 8850 3000 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 8850 3000 50  0001 C CNN
 F 3 "~" H 8850 3000 50  0001 C CNN
 	1    8850 3000
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Crossfader
+L Device:R_POT RV_Crossfader1
 U 1 1 659775A2
 P 7000 2350
-F 0 "RV_Crossfader" H 6931 2396 50  0000 R CNN
+F 0 "RV_Crossfader1" H 6931 2396 50  0000 R CNN
 F 1 "R_POT" H 6931 2305 50  0000 R CNN
-F 2 "" H 7000 2350 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTA6043_Single_Slide" H 7000 2350 50  0001 C CNN
 F 3 "~" H 7000 2350 50  0001 C CNN
 	1    7000 2350
-	-1   0    0    -1  
+	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Left_Bass
+L Device:R_POT RV_Left_Bass1
 U 1 1 659779F0
 P 8000 2000
-F 0 "RV_Left_Bass" H 7931 2046 50  0000 R CNN
+F 0 "RV_Left_Bass1" H 7931 2046 50  0000 R CNN
 F 1 "R_POT" H 7931 1955 50  0000 R CNN
-F 2 "" H 8000 2000 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 8000 2000 50  0001 C CNN
 F 3 "~" H 8000 2000 50  0001 C CNN
 	1    8000 2000
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Left_Mid
+L Device:R_POT RV_Left_Mid1
 U 1 1 65977E3F
 P 8000 2500
-F 0 "RV_Left_Mid" H 7931 2546 50  0000 R CNN
+F 0 "RV_Left_Mid1" H 7931 2546 50  0000 R CNN
 F 1 "R_POT" H 7931 2455 50  0000 R CNN
-F 2 "" H 8000 2500 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 8000 2500 50  0001 C CNN
 F 3 "~" H 8000 2500 50  0001 C CNN
 	1    8000 2500
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Switch:SW_Push SW_Left
+L Switch:SW_Push SW_Left1
 U 1 1 6597BE83
 P 5350 4550
-F 0 "SW_Left" H 5350 4835 50  0000 C CNN
+F 0 "SW_Left1" H 5350 4835 50  0000 C CNN
 F 1 "SW_Push" H 5350 4744 50  0000 C CNN
-F 2 "" H 5350 4750 50  0001 C CNN
+F 2 "footprints custom 1:D6R90F2LFS" H 5350 4750 50  0001 C CNN
 F 3 "~" H 5350 4750 50  0001 C CNN
 	1    5350 4550
 	1    0    0    -1  
 $EndComp
 $Comp
-L Switch:SW_Push SW_Right
+L Switch:SW_Push SW_Right1
 U 1 1 6597C315
 P 6000 4550
-F 0 "SW_Right" H 6000 4835 50  0000 C CNN
+F 0 "SW_Right1" H 6000 4835 50  0000 C CNN
 F 1 "SW_Push" H 6000 4744 50  0000 C CNN
-F 2 "" H 6000 4750 50  0001 C CNN
+F 2 "footprints custom 1:D6R90F2LFS" H 6000 4750 50  0001 C CNN
 F 3 "~" H 6000 4750 50  0001 C CNN
 	1    6000 4550
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Left_Mid
+L Device:R_POT RV_Left_Mid2
 U 1 1 6597BAE6
 P 8850 2500
-F 0 "RV_Left_Mid" H 8781 2546 50  0000 R CNN
+F 0 "RV_Left_Mid2" H 8781 2546 50  0000 R CNN
 F 1 "R_POT" H 8781 2455 50  0000 R CNN
-F 2 "" H 8850 2500 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 8850 2500 50  0001 C CNN
 F 3 "~" H 8850 2500 50  0001 C CNN
 	1    8850 2500
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Right_Bass
+L Device:R_POT RV_Right_Bass1
 U 1 1 6597BAE0
 P 8850 2000
-F 0 "RV_Right_Bass" H 8781 2046 50  0000 R CNN
+F 0 "RV_Right_Bass1" H 8781 2046 50  0000 R CNN
 F 1 "R_POT" H 8781 1955 50  0000 R CNN
-F 2 "" H 8850 2000 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 8850 2000 50  0001 C CNN
 F 3 "~" H 8850 2000 50  0001 C CNN
 	1    8850 2000
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Right_BPM
+L Device:R_POT RV_Right_BPM1
 U 1 1 6597BADA
 P 7000 3350
-F 0 "RV_Right_BPM" H 6931 3396 50  0000 R CNN
+F 0 "RV_Right_BPM1" H 6931 3396 50  0000 R CNN
 F 1 "R_POT" H 6931 3305 50  0000 R CNN
-F 2 "" H 7000 3350 50  0001 C CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_PTA4543_Single_Slide" H 7000 3350 50  0001 C CNN
 F 3 "~" H 7000 3350 50  0001 C CNN
 	1    7000 3350
 	-1   0    0    -1  
@@ -289,23 +289,23 @@ Wire Wire Line
 Wire Wire Line
 	5100 3000 5250 3000
 $Comp
-L Device:Rotary_Encoder_Switch SW_Selector
+L Device:Rotary_Encoder_Switch SW_Selector1
 U 1 1 6597C931
 P 4300 2000
-F 0 "SW_Selector" H 4300 2367 50  0000 C CNN
+F 0 "SW_Selector1" H 4300 2367 50  0000 C CNN
 F 1 "Rotary_Encoder_Switch" H 4300 2276 50  0000 C CNN
-F 2 "" H 4150 2160 50  0001 C CNN
+F 2 "footprints custom 2:XDCR_PEC11R-4215F-S0024" H 4150 2160 50  0001 C CNN
 F 3 "~" H 4300 2260 50  0001 C CNN
 	1    4300 2000
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Rotary_Encoder_Switch SW_Left_Table_Control
+L Device:Rotary_Encoder_Switch SW_Left_Table_Control1
 U 1 1 6597D2A5
 P 4300 2800
-F 0 "SW_Left_Table_Control" H 4300 3167 50  0000 C CNN
+F 0 "SW_Left_Table_Control1" H 4300 3167 50  0000 C CNN
 F 1 "Rotary_Encoder_Switch" H 4300 3076 50  0000 C CNN
-F 2 "" H 4150 2960 50  0001 C CNN
+F 2 "footprints custom 2:XDCR_PEC11R-4215F-S0024" H 4150 2960 50  0001 C CNN
 F 3 "~" H 4300 3060 50  0001 C CNN
 	1    4300 2800
 	1    0    0    -1  
@@ -345,12 +345,12 @@ Wire Wire Line
 Wire Wire Line
 	6200 3900 6200 4550
 $Comp
-L Device:Rotary_Encoder_Switch SW_Right_Table_Control
+L Device:Rotary_Encoder_Switch SW_Right_Table_Control1
 U 1 1 6597DC98
 P 4300 3650
-F 0 "SW_Right_Table_Control" H 4300 4017 50  0000 C CNN
+F 0 "SW_Right_Table_Control1" H 4300 4017 50  0000 C CNN
 F 1 "Rotary_Encoder_Switch" H 4300 3926 50  0000 C CNN
-F 2 "" H 4150 3810 50  0001 C CNN
+F 2 "footprints custom 2:XDCR_PEC11R-4215F-S0024" H 4150 3810 50  0001 C CNN
 F 3 "~" H 4300 3910 50  0001 C CNN
 	1    4300 3650
 	1    0    0    -1  

@@ -4,9 +4,9 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title ""
-Date ""
-Rev ""
+Title "MIXXX CONSOLE"
+Date "2024-01-09"
+Rev "1.0"
 Comp ""
 Comment1 ""
 Comment2 ""
@@ -14,10 +14,10 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L MCU_Module:Arduino_Leonardo A
+L MCU_Module:Arduino_Leonardo ARDUINO
 U 1 1 65974FEC
 P 5750 2600
-F 0 "A" H 5750 3781 50  0000 C CNN
+F 0 "ARDUINO" H 5750 3781 50  0000 C CNN
 F 1 "Arduino_Leonardo" H 5750 3690 50  0000 C CNN
 F 2 "Module:Arduino_UNO_R3" H 5750 2600 50  0001 C CIN
 F 3 "https://www.arduino.cc/en/Main/ArduinoBoardLeonardo" H 5750 2600 50  0001 C CNN
