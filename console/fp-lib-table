@@ -1,4 +1,3 @@
 (fp_lib_table
-  (lib (name "footprints custom 1")(type KiCad)(uri "/media/antiz/openshare/Documents/RaspiBO/kicad footprints/footprints.pretty")(options "")(descr ""))
-  (lib (name "footprints custom 2")(type KiCad)(uri "/media/antiz/openshare/Documents/RaspiBO/kicad footprints")(options "")(descr ""))
+  (lib (name digikey-footprints)(type KiCad)(uri /home/oloturia/Documents/digikey-kicad-library/digikey-footprints.pretty)(options "")(descr ""))
 )

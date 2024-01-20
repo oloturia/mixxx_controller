@@ -66,7 +66,7 @@ F 1 "R_POT" H 6931 2305 50  0000 R CNN
 F 2 "Potentiometer_THT:Potentiometer_Bourns_PTA6043_Single_Slide" H 7000 2350 50  0001 C CNN
 F 3 "~" H 7000 2350 50  0001 C CNN
 	1    7000 2350
-	1    0    0    -1  
+	-1   0    0    1   
 $EndComp
 $Comp
 L Device:R_POT RV_Left_Bass1
@@ -96,7 +96,7 @@ U 1 1 6597BE83
 P 5350 4550
 F 0 "SW_Left1" H 5350 4835 50  0000 C CNN
 F 1 "SW_Push" H 5350 4744 50  0000 C CNN
-F 2 "footprints custom 1:D6R90F2LFS" H 5350 4750 50  0001 C CNN
+F 2 "digikey-footprints:D6R90F2LFS" H 5350 4750 50  0001 C CNN
 F 3 "~" H 5350 4750 50  0001 C CNN
 	1    5350 4550
 	1    0    0    -1  
@@ -107,16 +107,16 @@ U 1 1 6597C315
 P 6000 4550
 F 0 "SW_Right1" H 6000 4835 50  0000 C CNN
 F 1 "SW_Push" H 6000 4744 50  0000 C CNN
-F 2 "footprints custom 1:D6R90F2LFS" H 6000 4750 50  0001 C CNN
+F 2 "digikey-footprints:D6R90F2LFS" H 6000 4750 50  0001 C CNN
 F 3 "~" H 6000 4750 50  0001 C CNN
 	1    6000 4550
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_POT RV_Left_Mid2
+L Device:R_POT RV_Right_Mid2
 U 1 1 6597BAE6
 P 8850 2500
-F 0 "RV_Left_Mid2" H 8781 2546 50  0000 R CNN
+F 0 "RV_Right_Mid2" H 8781 2546 50  0000 R CNN
 F 1 "R_POT" H 8781 2455 50  0000 R CNN
 F 2 "Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 8850 2500 50  0001 C CNN
 F 3 "~" H 8850 2500 50  0001 C CNN
@@ -294,7 +294,7 @@ U 1 1 6597C931
 P 4300 2000
 F 0 "SW_Selector1" H 4300 2367 50  0000 C CNN
 F 1 "Rotary_Encoder_Switch" H 4300 2276 50  0000 C CNN
-F 2 "footprints custom 2:XDCR_PEC11R-4215F-S0024" H 4150 2160 50  0001 C CNN
+F 2 "digikey-footprints:XDCR_PEC11R-4215F-S0024" H 4150 2160 50  0001 C CNN
 F 3 "~" H 4300 2260 50  0001 C CNN
 	1    4300 2000
 	1    0    0    -1  
@@ -305,7 +305,7 @@ U 1 1 6597D2A5
 P 4300 2800
 F 0 "SW_Left_Table_Control1" H 4300 3167 50  0000 C CNN
 F 1 "Rotary_Encoder_Switch" H 4300 3076 50  0000 C CNN
-F 2 "footprints custom 2:XDCR_PEC11R-4215F-S0024" H 4150 2960 50  0001 C CNN
+F 2 "digikey-footprints:XDCR_PEC11R-4215F-S0024" H 4150 2960 50  0001 C CNN
 F 3 "~" H 4300 3060 50  0001 C CNN
 	1    4300 2800
 	1    0    0    -1  
@@ -350,7 +350,7 @@ U 1 1 6597DC98
 P 4300 3650
 F 0 "SW_Right_Table_Control1" H 4300 4017 50  0000 C CNN
 F 1 "Rotary_Encoder_Switch" H 4300 3926 50  0000 C CNN
-F 2 "footprints custom 2:XDCR_PEC11R-4215F-S0024" H 4150 3810 50  0001 C CNN
+F 2 "digikey-footprints:XDCR_PEC11R-4215F-S0024" H 4150 3810 50  0001 C CNN
 F 3 "~" H 4300 3910 50  0001 C CNN
 	1    4300 3650
 	1    0    0    -1  
