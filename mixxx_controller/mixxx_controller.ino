@@ -13,10 +13,10 @@
  */
 
 // Uncomment this line if you want pin and values printed on the serial, remember to open a console because it waits until a connection is established.
- #define DEBUG
+// #define DEBUG
 
 // Analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect.
-const int dead_zone = 10;
+const int dead_zone = 15;
 
 // Stickyness is a deazone that lies around extreme positions (0-1023) and the middle (511, but trimmable) of readings.
 const int stickyness = 30;
