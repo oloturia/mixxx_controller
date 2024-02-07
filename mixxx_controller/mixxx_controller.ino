@@ -117,8 +117,8 @@ struct digitalButton  {
 const int button_pins[] = {9,11,8,7,13};
 const int button_effect[] = {14,15,16,17,20};
 const int button_effect_toggle[] = {0,0,0,0,0};
-const int button_effect_long[] {0,0,23,24,25};
-const int button_effect_toggle_long[] {0,0,0,0,26};
+const int button_effect_long[] {0,23,0,24,25};
+const int button_effect_toggle_long[] {0,0,0,26,0};
 digitalButton switches[] = {
   {button_pins[0],false,0,0,button_effect[0],button_effect_toggle[0],false,button_effect_long[0],button_effect_toggle_long[0],false,false},
   {button_pins[1],false,0,0,button_effect[1],button_effect_toggle[1],false,button_effect_long[1],button_effect_toggle_long[1],false,false},
@@ -148,16 +148,40 @@ byte midi_value;
 
 void noteOn(byte channel, byte pitch, byte velocity) {
   midiEventPacket_t noteOn = {0x09, 0x90 | channel, pitch, velocity};
+  #ifdef DEBUG
+    Serial.print("Note on:");
+    Serial.print(channel);
+    Serial.print(",");
+    Serial.print(pitch);
+    Serial.print(",");
+    Serial.println(velocity);
+  #endif
   MidiUSB.sendMIDI(noteOn);
 }
 
 void noteOff(byte channel, byte pitch, byte velocity) {
   midiEventPacket_t noteOff = {0x08, 0x80 | channel, pitch, velocity};
+   #ifdef DEBUG
+    Serial.print("Note off:");
+    Serial.print(channel);
+    Serial.print(",");
+    Serial.print(pitch);
+    Serial.print(",");
+    Serial.println(velocity);
+  #endif
   MidiUSB.sendMIDI(noteOff);
 }
 
 void controlChange(byte channel, byte control, byte value) {
   midiEventPacket_t event = {0x0B, 0xB0 | channel, control, value};
+  #ifdef DEBUG
+    Serial.print("Control change:");
+    Serial.print(channel);
+    Serial.print(",");
+    Serial.print(control);
+    Serial.print(",");
+    Serial.println(value);
+  #endif
   MidiUSB.sendMIDI(event);
 }
 
