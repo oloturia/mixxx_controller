@@ -43,17 +43,17 @@ const int analog_controls_pins[] = {A0,A1,A2,A3,A4,A5,A7,A10,A11};
 const int analog_controls_effects[] = {7,8,9,1,2,3,4,5,6};
 
 analogControl analog_controls[] = {
-  analogControl {analog_controls_pins[0],0,0,analog_controls_effects[0],511},
+  analogControl {analog_controls_pins[0],0,0,analog_controls_effects[0],520},
   analogControl {analog_controls_pins[1],0,0,analog_controls_effects[1],520},
   analogControl {analog_controls_pins[2],0,0,analog_controls_effects[2],520},
   
-  analogControl {analog_controls_pins[3],0,0,analog_controls_effects[3],511},
-  analogControl {analog_controls_pins[4],0,0,analog_controls_effects[4],511},
-  analogControl {analog_controls_pins[5],0,0,analog_controls_effects[5],511},
+  analogControl {analog_controls_pins[3],0,0,analog_controls_effects[3],520},
+  analogControl {analog_controls_pins[4],0,0,analog_controls_effects[4],520},
+  analogControl {analog_controls_pins[5],0,0,analog_controls_effects[5],520},
   
-  analogControl {analog_controls_pins[6],0,0,analog_controls_effects[6],511},
-  analogControl {analog_controls_pins[7],0,0,analog_controls_effects[7],511},
-  analogControl {analog_controls_pins[8],0,0,analog_controls_effects[8],511},
+  analogControl {analog_controls_pins[6],0,0,analog_controls_effects[6],520},
+  analogControl {analog_controls_pins[7],0,0,analog_controls_effects[7],520},
+  analogControl {analog_controls_pins[8],0,0,analog_controls_effects[8],520},
 };
 const int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
 
@@ -154,7 +154,8 @@ void noteOn(byte channel, byte pitch, byte velocity) {
     Serial.print(",");
     Serial.print(pitch);
     Serial.print(",");
-    Serial.println(velocity);
+    Serial.print(velocity);
+    Serial.print("; ");
   #endif
   MidiUSB.sendMIDI(noteOn);
 }
@@ -167,7 +168,8 @@ void noteOff(byte channel, byte pitch, byte velocity) {
     Serial.print(",");
     Serial.print(pitch);
     Serial.print(",");
-    Serial.println(velocity);
+    Serial.print(velocity);
+    Serial.print("; ");
   #endif
   MidiUSB.sendMIDI(noteOff);
 }
@@ -180,7 +182,8 @@ void controlChange(byte channel, byte control, byte value) {
     Serial.print(",");
     Serial.print(control);
     Serial.print(",");
-    Serial.println(value);
+    Serial.print(value);
+    Serial.print("; ");
   #endif
   MidiUSB.sendMIDI(event);
 }
@@ -225,6 +228,7 @@ void loop() {
       midi_value = map(analog_controls[i].value,0,1023,0,127);
       controlChange(1,analog_controls[i].effect,midi_value);
       #ifdef DEBUG
+        Serial.println("DEBUG on, to turn off comment '#define DEBUG' on the source sketch");
         Serial.print("Sent ");
         Serial.print(analog_controls[i].effect);
         Serial.print(",");      
