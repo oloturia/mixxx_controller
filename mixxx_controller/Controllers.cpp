@@ -52,7 +52,7 @@ void controlChange(byte channel, byte control, byte value) {
   MidiUSB.sendMIDI(event);
 }
 
-// Constructor and methods for analog and buttons (encoders use a different library)
+// Constructor and methods for analog controls and buttons (encoders use a different library)
 
 AnalogControl::AnalogControl(int pin, byte effect, int middle) {
   this->pin = pin;

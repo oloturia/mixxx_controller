@@ -10,6 +10,13 @@
  * Last revision 14-mar-2024
  */
 
+/* You can alter some library wide parameters in Controllers.h
+ * DEBUG enables serial printing of MIDI messages
+ * DEAD_ZONE contains the smallest increment that the control must have to trigger the effect.
+ * STICKYNESS is a deazone that lies around extreme positions (0-1023) and the middle of readings.
+ * TIME_INTERVAL is the time, in ms, needed for a long press
+*/
+
 // Pin definition
 // Analog knobs and sliders
 /* Connect linear potentiometers (sliders and knobs) to Analog Inputs on your board.
@@ -19,22 +26,23 @@
  *  
  * Change the first value accordingly, the last one is the MIDI effect that is sent to
  * Mixxx, every control needs to have a unique number.
+ * 
+ * MID-DEADZONE is the middle of the controller. Usually is 511, but it's trimmable.
 */
 
-int analog_controls_pins[] = {A0,A1,A2,A3,A4,A5,A7,A10,A11};
-int analog_controls_effects[] = {7,8,9,1,2,3,4,5,6};
+// Define every control as AnalogControl(PIN,EFFECT,MID-DEADZONE)
 AnalogControl analog_controls[] = {
-  AnalogControl(analog_controls_pins[0],analog_controls_effects[0],520),
-  AnalogControl(analog_controls_pins[1],analog_controls_effects[1],520),
-  AnalogControl(analog_controls_pins[2],analog_controls_effects[2],520),
+  AnalogControl(A0,7,520),
+  AnalogControl(A1,8,520),
+  AnalogControl(A2,9,520),
   
-  AnalogControl(analog_controls_pins[3],analog_controls_effects[3],520),
-  AnalogControl(analog_controls_pins[4],analog_controls_effects[4],520),
-  AnalogControl(analog_controls_pins[5],analog_controls_effects[5],520),
+  AnalogControl(A3,1,520),
+  AnalogControl(A4,2,520),
+  AnalogControl(A5,3,520),
   
-  AnalogControl(analog_controls_pins[6],analog_controls_effects[6],520),
-  AnalogControl(analog_controls_pins[7],analog_controls_effects[7],520),
-  AnalogControl(analog_controls_pins[8],analog_controls_effects[8],520),
+  AnalogControl(A7,4,520),
+  AnalogControl(A10,5,520),
+  AnalogControl(A11,6,520),
 };
 
 int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
@@ -43,40 +51,36 @@ int active_analog_controls = sizeof(analog_controls)/sizeof(analog_controls[0]);
 /* Rotary Encorders need two pins. 
  * clk should be an interrupt. On Leonardo interrupts are on pin 0, 1, 2, 3 and 7.
  * dt are digital pins
- * rot_effect and rot_effect+1 must be unique
+ * effect and effect+1 must be unique
  * the +1 is reserved for anticlockwise  
  */ 
 
-const int rot_clk_pins[] = {2,3,0};
-const int rot_dt_pins[] = {4,5,1};
-const int rot_effect[] = {10,12,18};
-EncoderButton rotary_encoders[] = {
- EncoderButton(rot_clk_pins[0],rot_dt_pins[0]),
- EncoderButton(rot_clk_pins[1],rot_dt_pins[1]),
- EncoderButton(rot_clk_pins[2],rot_dt_pins[2]),
+// Define every control as {EncoderButton(CLK,DT), EFFECT}
+RotaryEncoderControl rotary_encoders[] = {
+  {EncoderButton(2,4),10},
+  {EncoderButton(3,5),12},
+  {EncoderButton(0,1),18},
 };
+
+const int rot_effect[] = {10,12,18};
+
 const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 
 // Digital buttons
 /* Digital buttons are connected to a digital pin. If you use toggle, long press or long press toggle rembember that the MIDI message byte has to be unique.
- * long_inteval is the interval of long clicks, toggle and long_toggle (for long presses) send two different messages for odd and even strokes.
- * If effect is 0 the toggle, long press or long press toggle is disabled. 
+ * toggle effect and long toggle effect (for long presses) send two different messages for odd and even strokes.
+ * If effect is 0 the toggle, long press or long press toggle is disabled.
  */
 
-const int button_pins[] = {9,11,8,7,13};
-const int button_effect[] = {14,15,16,17,20};
-const int button_effect_toggle[] = {0,0,0,0,0};
-const int button_effect_long[] {0,23,0,24,25};
-const int button_effect_toggle_long[] {0,0,0,26,0};
-
-DigitalButton switches[] = {
-  DigitalButton(button_pins[0],button_effect[0],button_effect_toggle[0],button_effect_long[0],button_effect_toggle_long[0]),
-  DigitalButton(button_pins[1],button_effect[1],button_effect_toggle[1],button_effect_long[1],button_effect_toggle_long[1]),
-  DigitalButton(button_pins[2],button_effect[2],button_effect_toggle[2],button_effect_long[2],button_effect_toggle_long[2]),
-  DigitalButton(button_pins[3],button_effect[3],button_effect_toggle[3],button_effect_long[3],button_effect_toggle_long[3]),
-  DigitalButton(button_pins[4],button_effect[4],button_effect_toggle[4],button_effect_long[4],button_effect_toggle_long[4]),
+// Define every control as DigitalButton(PIN,PRESS EFFECT, PRESS TOGGLE EFFECT (0=disabled), LONG PRESS EFFECT, LONG PRESS TOGGLE EFFECT (0=disabled)
+DigitalButton buttons[] = {
+  DigitalButton(9 ,14,0,0 ,0 ),
+  DigitalButton(11,15,0,0,0 ),
+  DigitalButton(8 ,16,0,24 ,0 ),
+  DigitalButton(7 ,17,0,23,0),
+  DigitalButton(13,20,0,25,26 ),
 };
-const int active_switches = sizeof(switches)/sizeof(switches[0]);
+const int active_buttons = sizeof(buttons)/sizeof(buttons[0]);
 
 //Callback function for the encoders
 void eb_Encoder(EncoderButton& eb) {
@@ -97,8 +101,8 @@ void setup() {
   #endif
 
   for (int i = 0; i < active_encoders; i++) {
-    rotary_encoders[i].setUserId(rot_effect[i]);
-    rotary_encoders[i].setEncoderHandler(eb_Encoder);
+    rotary_encoders[i].rotary_encoder.setUserId(rotary_encoders[i].effect);
+    rotary_encoders[i].rotary_encoder.setEncoderHandler(eb_Encoder);
   }   
 }
 
@@ -108,13 +112,13 @@ void loop() {
     analog_controls[i].checkStatus();
   }
 
-  // Switches check
-  for (int i = 0; i < active_switches; i++) {
-    switches[i].checkStatus();
+  // Buttons check
+  for (int i = 0; i < active_buttons; i++) {
+    buttons[i].checkStatus();
   }
   
   // Rotary encoders check
   for (int i = 0; i < active_encoders; i++) {
-    rotary_encoders[i].update();
+    rotary_encoders[i].rotary_encoder.update();
   }
 }

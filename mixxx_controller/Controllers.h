@@ -5,7 +5,7 @@
 #include "MIDIUSB.h"
 
 // Uncomment this line if you want pin and values printed on the serial, remember to open a console because it waits until a connection is established.
-//#define DEBUG
+#define DEBUG
 
 // Analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect.
 #define DEAD_ZONE 15
@@ -48,6 +48,12 @@ class DigitalButton {
   public:
     DigitalButton(int pin, byte effect, byte effect_toggle, byte effect_long, byte effect_long_toggle);
     void checkStatus();
+};
+
+
+struct RotaryEncoderControl {
+  EncoderButton rotary_encoder;
+  byte effect;
 };
 
 #endif
