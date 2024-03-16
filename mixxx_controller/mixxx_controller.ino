@@ -62,8 +62,6 @@ RotaryEncoderControl rotary_encoders[] = {
   {EncoderButton(0,1),18},
 };
 
-const int rot_effect[] = {10,12,18};
-
 const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 
 // Digital buttons
