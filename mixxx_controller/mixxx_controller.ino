@@ -72,11 +72,11 @@ const int active_encoders = sizeof(rotary_encoders)/sizeof(rotary_encoders[1]);
 
 // Define every control as DigitalButton(PIN,PRESS EFFECT, PRESS TOGGLE EFFECT (0=disabled), LONG PRESS EFFECT, LONG PRESS TOGGLE EFFECT (0=disabled)
 DigitalButton buttons[] = {
-  DigitalButton(9 ,14,0,0 ,0 ),
-  DigitalButton(11,15,0,0,0 ),
-  DigitalButton(8 ,16,0,24 ,0 ),
-  DigitalButton(7 ,17,0,23,0),
-  DigitalButton(13,20,0,25,26 ),
+  DigitalButton( 9,14,0, 0, 0),
+  DigitalButton(11,15,0, 0, 0),
+  DigitalButton( 8,16,0,24, 0),
+  DigitalButton( 7,17,0,23, 0),
+  DigitalButton(13,20,0,25,26),
 };
 const int active_buttons = sizeof(buttons)/sizeof(buttons[0]);
 

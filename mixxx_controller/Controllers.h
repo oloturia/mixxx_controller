@@ -5,7 +5,7 @@
 #include "MIDIUSB.h"
 
 // Uncomment this line if you want pin and values printed on the serial, remember to open a console because it waits until a connection is established.
-#define DEBUG
+//#define DEBUG
 
 // Analog controls (sliders and potentiometers), the deadzone is the smallest increment that the control must have to trigger the effect.
 #define DEAD_ZONE 15
